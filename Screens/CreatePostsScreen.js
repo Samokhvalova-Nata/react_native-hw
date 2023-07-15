@@ -1,10 +1,10 @@
 import React from "react";
 import { StyleSheet, Text, View, } from 'react-native';
 
-export default function PostsScreen() {
+export default function CreatePostsScreen() {
     return (
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-            <Text style={styles.title}>Публікації</Text>
+            <Text style={styles.title}>Створити публікацію</Text>
         </View>
     )
 };

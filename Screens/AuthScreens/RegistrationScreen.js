@@ -1,12 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from "react";
+import { useNavigation } from '@react-navigation/native';
 import { AntDesign } from '@expo/vector-icons';
-import Background from '../Components/Background/Background';
+import Background from '../../Components/Background/Background';
 import {
     StyleSheet,
     TouchableWithoutFeedback,
     KeyboardAvoidingView,
-    Keyboard, View, TextInput, TouchableOpacity, Text, Image
+    Keyboard, View, TextInput, TouchableOpacity, Text, Image, Dimensions
 } from "react-native";
 
 
@@ -18,6 +19,20 @@ export default function RegisterScreen() {
     const [isFocused, setIsFocused] = useState(false); 
     const [isShownPsw, setIsShownPsw] = useState(false);
     const [keyboardStatus, setKeyboardStatus] = useState(false);
+    const navigation = useNavigation();
+    // const [dimensions, setDimensions] = useState(Dimensions.get('window').width - 8 * 2);
+
+    // useEffect(() => {
+    //     const onChange = () => {
+    //         const width = Dimensions.get('window').width - 8 * 2;
+    //         console.log('width', width);
+    //         setDimensions(width);
+    //     }
+    //     Dimensions.addEventListener('change', onChange);
+    //     return () => {
+    //         Dimensions.removeEventListener('change', onChange);
+    //     };
+    // },[])
 
     useEffect(() => {
     const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
@@ -49,6 +64,8 @@ export default function RegisterScreen() {
             console.info(
             `User "${name}" with email "${email}" and password "${password}" has been registred`
             );
+            navigation.navigate("Home");
+
         };
     };
 
@@ -63,10 +80,13 @@ export default function RegisterScreen() {
                 <KeyboardAvoidingView style={styles.container}
                     behavior={Platform.OS == "ios" ? "padding" : "height"}>
 
-                    <View style={styles.form}>
+                    <View style={{
+                        ...styles.form,
+                        // width: dimensions,
+                    }}>
                         <View style={styles.avatarWrap}>
                             {avatar && 
-                                <Image source={require('../assets/images/avatar.jpg')}
+                                <Image source={require('../../assets/images/avatar.jpg')}
                                     style={styles.avatar}
                                 />}
                             <TouchableOpacity style={styles.btnAdd} onPress={handleAvatarBtn}>
@@ -89,6 +109,7 @@ export default function RegisterScreen() {
                             onBlur={handleBlur}
                             onFocus={() => handleFocus("username")}
                             onChangeText={setName}
+                            
                         />
 
                         <TextInput
@@ -141,7 +162,7 @@ export default function RegisterScreen() {
                                         Вже є акаунт?
                                     </Text>
                                     <Text style={[styles.text, { textDecorationLine: 'underline' }]}
-                                        onPress={() => console.log("Redirect to Login")}>
+                                        onPress={() => navigation.navigate("Login")}>
                                         Увійти
                                     </Text>
                                 </View>
@@ -158,6 +179,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: "flex-end",
+        // alignItems: 'center',
     },
 
     form: {

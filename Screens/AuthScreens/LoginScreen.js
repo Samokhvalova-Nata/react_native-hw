@@ -1,5 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from "react";
+import { useNavigation } from '@react-navigation/native';
 import {
     StyleSheet,
     Text, View,  
@@ -8,14 +9,15 @@ import {
     Keyboard,
     KeyboardAvoidingView, Platform, TextInput
 } from 'react-native';
-import Background from '../Components/Background/Background';
+import Background from '../../Components/Background/Background';
 
-export default function LoginScreen(props) {
+export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isFocused, setIsFocused] = useState(false); 
     const [isShownPsw, setIsShownPsw] = useState(false);
     const [keyboardStatus, setKeyboardStatus] = useState(false);
+    const navigation = useNavigation();
 
     useEffect(() => {
     const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
@@ -45,7 +47,8 @@ export default function LoginScreen(props) {
     const handleLoginSubmit = (email, password) => {
         if (email !== '' && password !== '') {
             console.info(
-            `User with email "${email}" and password "${password}" has been logged in`);
+                `User with email "${email}" and password "${password}" has been logged in`);
+            navigation.navigate("Home");
         };
     };
 
@@ -107,7 +110,7 @@ export default function LoginScreen(props) {
                                 <View style={{ flexDirection: "row", justifyContent: "center", gap: 5 }}>
                                     <Text style={styles.text}>Немає акаунту?</Text>
                                     <Text style={[styles.text, { textDecorationLine: 'underline' }]}
-                                        onPress={() => console.log("Redirect to Registration")}>
+                                        onPress={() => navigation.navigate("Registration")}>
                                         Зареєструватися
                                     </Text>
                                 </View>
