@@ -20,19 +20,7 @@ export default function RegisterScreen() {
     const [isShownPsw, setIsShownPsw] = useState(false);
     const [keyboardStatus, setKeyboardStatus] = useState(false);
     const navigation = useNavigation();
-    // const [dimensions, setDimensions] = useState(Dimensions.get('window').width - 8 * 2);
 
-    // useEffect(() => {
-    //     const onChange = () => {
-    //         const width = Dimensions.get('window').width - 8 * 2;
-    //         console.log('width', width);
-    //         setDimensions(width);
-    //     }
-    //     Dimensions.addEventListener('change', onChange);
-    //     return () => {
-    //         Dimensions.removeEventListener('change', onChange);
-    //     };
-    // },[])
 
     useEffect(() => {
     const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
@@ -64,7 +52,7 @@ export default function RegisterScreen() {
             console.info(
             `User "${name}" with email "${email}" and password "${password}" has been registred`
             );
-            navigation.navigate("Home");
+            navigation.navigate("Home", {screen: "PostsScreen", params: {user: name, mail: email}});
 
         };
     };
@@ -86,7 +74,7 @@ export default function RegisterScreen() {
                     }}>
                         <View style={styles.avatarWrap}>
                             {avatar && 
-                                <Image source={require('../../assets/images/avatar.jpg')}
+                                <Image source={require('../../assets/images/avatar.jpg')} alt="User photo"
                                     style={styles.avatar}
                                 />}
                             <TouchableOpacity style={styles.btnAdd} onPress={handleAvatarBtn}>
@@ -109,7 +97,6 @@ export default function RegisterScreen() {
                             onBlur={handleBlur}
                             onFocus={() => handleFocus("username")}
                             onChangeText={setName}
-                            
                         />
 
                         <TextInput
