@@ -52,39 +52,54 @@ export default function App() {
 
   return (
     <Provider store={store}>
-      {/* <PersistGate loading={null} persistor={persistor}> */}
+      <PersistGate loading={null} persistor={persistor}>
         <NavigationContainer>
-      <MainStack.Navigator initialRouteName="Home">
-        <MainStack.Screen options={{
-          headerShown: false,
-          }}
-          name="Login" component={LoginScreen} />
-        <MainStack.Screen options={{
-          headerShown: false,
-          }}
-          name="Registration" component={RegisterScreen} />
-        <MainStack.Screen options={{
-          headerShown: false,
-          }}
-          name="Home" component={HomeScreen} />
-        <MainStack.Screen options={{
-          headerShown: true,
-          title: "Коментарі",
-                    headerTintColor: "#212121",
-                    headerTitleStyle: {
-                        fontWeight: 500,
-                        fontSize: 17,
-                        textAlign: 'center',
-                    },
-          }}
-          name="Comments" component={CommentsScreen} />
-        <MainStack.Screen options={{
-          headerShown: false,
-          }}
-          name="Map" component={MapScreen} />
-      </MainStack.Navigator>
+          <MainStack.Navigator initialRouteName="Home">
+            <MainStack.Screen
+              options={{
+                headerShown: false,
+              }}
+              name="Login"
+              component={LoginScreen}
+            />
+            <MainStack.Screen
+              options={{
+                headerShown: false,
+              }}
+              name="Registration"
+              component={RegisterScreen}
+            />
+            <MainStack.Screen
+              options={{
+                headerShown: false,
+              }}
+              name="Home"
+              component={HomeScreen}
+            />
+            <MainStack.Screen
+              options={{
+                headerShown: true,
+                title: "Коментарі",
+                headerTintColor: "#212121",
+                headerTitleStyle: {
+                  fontWeight: 500,
+                  fontSize: 17,
+                  textAlign: "center",
+                },
+              }}
+              name="Comments"
+              component={CommentsScreen}
+            />
+            <MainStack.Screen
+              options={{
+                headerShown: false,
+              }}
+              name="Map"
+              component={MapScreen}
+            />
+          </MainStack.Navigator>
         </NavigationContainer>
-      {/* </PersistGate> */}
+      </PersistGate>
     </Provider>
   );
 };

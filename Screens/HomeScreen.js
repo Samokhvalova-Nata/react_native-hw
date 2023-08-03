@@ -17,7 +17,7 @@ export default function HomeScreen() {
 
     return (
         <Tabs.Navigator
-            initialRouteName="CreatePostsScreen"
+            initialRouteName="ProfileScreen"
             screenOptions={({ route }) => ({
                 tabBarShowLabel: false,
                 headerTitleAlign: "center",
@@ -82,9 +82,9 @@ export default function HomeScreen() {
                         fontSize: 17,
                         textAlign: 'center',
                     },
-                    // tabBarStyle: {
-                    //     display: "none",
-                    // },
+                    tabBarStyle: {
+                        display: "none",
+                    },
                     headerLeft: () => (
                         <Feather name="arrow-left" size={24} color={COLORS.secondaryText} style={{ marginLeft: 10 }}
                         onPress={() => navigation.navigate("PostsScreen")} />

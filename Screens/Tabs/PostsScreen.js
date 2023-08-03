@@ -1,56 +1,40 @@
-import { useRoute } from "@react-navigation/native";
-import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, Image, FlatList , ScrollView} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { COLORS } from "../../common/vars";
-import PostItem from "../../Components/PostItem";
+import React from "react";
+import PostItem from "../../Components/PostItem/PostItem";
+import { StyleSheet, Text, View, Image, ScrollView } from 'react-native';
 import { useSelector } from "react-redux";
+import { COLORS } from "../../common/vars";
 import { getPosts } from "../../redux/post/postSelectors";
-import { getUserAvatar, getUserEmail, getUserName } from "../../redux/auth/authSelectors";
+import { getUserEmail, getUserName } from "../../redux/auth/authSelectors";
 
 
-export default function PostsScreen({ route }) {
+export default function PostsScreen() {
     const posts = useSelector(getPosts);
     const name = useSelector(getUserName);
     const email = useSelector(getUserEmail);
     //TODO const avatar = useSelector(getUserAvatar);
 
-console.log('posts', posts)
-    // const [name, setName] = useState('Natali Romanova');
-    // const [email, setEmail] = useState('email@example.com');
-
-    // useEffect(()=>{
-    //     if (route.params) {
-    //         setName(route.params.user);
-    //         setEmail(route.params.mail);
-    //         setPosts((prevState) => [...prevState, route.params.posts])
-    //     }
-    // }, [route.params]);
-
-
     return (
         <ScrollView>
             <View style={styles.container}>
             <View style={styles.userInfo}>
-                <Image style={styles.avatar} source={require( "../../assets/images/avatar.jpg") } alt="User photo"/>
+                <Image style={styles.avatar}
+                    source={require("../../assets/images/avatar.jpg")}
+                    alt="User photo" />
                 <View style={styles.userData}>
                     <Text style={styles.userName}>{name}</Text>
                     <Text style={styles.userEmail}>{email}</Text>
                 </View>
             </View>
             {posts && 
-                posts.map(({
-                id, title, comments, location, photo,
-                }) => (
+                posts.map(({ id, title, comments, location, photo }) => (
                     <PostItem
                         key={id}
                         title={title}
                         comments={comments}
                         location={location}
                         url={photo}
-                    />
-                )
-                )}
+                    />))
+            }
         </View>
         </ScrollView>
     )
@@ -60,7 +44,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: "flex-start",
-        // alignItems: "center",
         paddingHorizontal: 16,
         paddingTop: 32,
         backgroundColor: COLORS.mainBcg,

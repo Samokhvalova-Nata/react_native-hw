@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, nanoid } from "@reduxjs/toolkit";
 
 const initialState = {
     name: 'Natali Romanova',
@@ -7,32 +7,30 @@ const initialState = {
     isLogged: false,
 };
 
-const authSlice = createSlice({
+export const authSlice = createSlice({
     name: "auth",
     initialState,
     reducers: {
-        addName: (state, action) => ({
-            ...state,
-            name: action.payload,
-        }),
-        addEmail: (state, action) => ({
-            ...state,
-            email: action.payload,
-        }),
-        addAvatar: (state, action) => ({
-            ...state,
-            avatar: action.payload,
-        }),
-        // addName: (state, action) => {
-        //     state.name = action.payload;
-        // },
-        // addEmail: (state, action) => {
-        //     state.email = action.payload;
-        // },
-        // addAvatar: (state, action) => {
-        //     state.avatar = action.payload;
-        // },
+        addUser: {
+            reducer(state, action) {
+                state.auth.push(action.payload);
+            },
+            prepare(name, number) {
+                    return{
+                        payload: {
+                            name,
+                            email,
+                        },
+                    };
+            },
+        },
+        addAvatar: {
+            reducer (state, action) {
+            state.auth.avatar.push(action.payload);
+        }, 
+        }, 
     }
 })
 
 export const authReducer = authSlice.reducer;
+export const { addUser, addAvatar } = authSlice.actions;
