@@ -1,15 +1,10 @@
-import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from "react";
 import { useNavigation } from '@react-navigation/native';
-import {
-    StyleSheet,
-    Text, View,  
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    Keyboard,
-    KeyboardAvoidingView, Platform, TextInput
-} from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform, TextInput } from 'react-native';
+import { COLORS } from "../../common/vars";
 import Background from '../../Components/Background/Background';
+import MainButton from '../../Components/Buttons/MainButton';
+import AuthLinkButton from "../../Components/Buttons/AuthLinkButton";
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
@@ -60,12 +55,10 @@ export default function LoginScreen() {
                     behavior={Platform.OS == "ios" ? "padding" : "height"}>
 
                     <View style={styles.form}>
-
                         <Text style={styles.formTitle}>Увійти</Text>
-
                         <TextInput
-                            style={[styles.input, { borderColor: isFocused === "emailAddress" ? "#FF6C00" : "#E8E8E8" }]}
-                            placeholderTextColor={'#BDBDBD'}
+                            style={[styles.input, { borderColor: isFocused === "emailAddress" ? COLORS.accent : COLORS.borders }]}
+                            placeholderTextColor={COLORS.secondaryText}
                             placeholder="Адреса електронної пошти"
                             value={email}
                             textContentType="emailAddress"
@@ -77,8 +70,8 @@ export default function LoginScreen() {
 
                         <View style={position= 'relative'}>
                             <TextInput
-                            style={[styles.input, { marginBottom: 0 }, { borderColor: isFocused === "password" ? "#FF6C00" : "#E8E8E8" }]}
-                            placeholderTextColor={'#BDBDBD'}
+                            style={[styles.input, { marginBottom: 0 }, { borderColor: isFocused === "password" ? COLORS.accent : COLORS.borders }]}
+                            placeholderTextColor={COLORS.secondaryText}
                             placeholder="Пароль"
                             value={password}
                             textContentType="password"
@@ -100,22 +93,15 @@ export default function LoginScreen() {
 
                         {!keyboardStatus &&
                             <View>
-                                <TouchableOpacity
-                                    activeOpacity={0.8}
-                                    style={styles.btnSubmit}
-                                    onPress={() => handleLoginSubmit( email, password)}>
-                                    <Text title="Login" style={styles.btnSubmitTitle} >Увійти
-                                    </Text>
-                                </TouchableOpacity>
-                                <View style={{ flexDirection: "row", justifyContent: "center", gap: 5 }}>
-                                    <Text style={styles.text}>Немає акаунту?</Text>
-                                    <Text style={[styles.text, { textDecorationLine: 'underline' }]}
-                                        onPress={() => navigation.navigate("Registration")}>
-                                        Зареєструватися
-                                    </Text>
-                                </View>
+                                <MainButton
+                                    text='Увійти'
+                                    onPress={() => handleLoginSubmit(email, password)} />
+                                <AuthLinkButton
+                                    text='Немає акаунту?'
+                                    linkText='Зареєструватися'
+                                    onPress={() => navigation.navigate("Registration")}
+                                />
                             </View>}
-                        <StatusBar style="auto" />
                     </View>
                 </KeyboardAvoidingView>
             </TouchableWithoutFeedback>
@@ -135,13 +121,13 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         borderTopStartRadius: 25,
         borderTopEndRadius: 25,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: COLORS.mainBcg,
         fontFamily: 'Roboto-Regular',
         fontSize: 16,
     },
     formTitle: {
         fontFamily: 'Roboto-Medium',
-        color: "#212121",
+        color: COLORS.mainText,
         marginBottom: 33,
         fontSize: 30,
         textAlign: "center",
@@ -150,9 +136,9 @@ const styles = StyleSheet.create({
         fontFamily: 'Roboto-Regular',
         height: 50,
         borderRadius: 8,
-        backgroundColor: "#F6F6F6",
+        backgroundColor: COLORS.secondaryBcg,
         borderWidth: 1,
-        color: "#212121",
+        color: COLORS.mainText,
         padding: 16,
         marginBottom: 16,
     },
@@ -162,24 +148,6 @@ const styles = StyleSheet.create({
         top: 14,
     },
     btnShowPasswordText: {
-        color: '#1B4371',
-    },
-    btnSubmit: {
-        height: 51,
-        backgroundColor: "#FF6C00",
-        borderRadius: 100,
-        marginTop: 43,
-        alignItems: "center",
-        paddingTop: 16,
-        paddingBottom: 16,
-    },
-    btnSubmitTitle: {
-        color: "#FFFFFF",
-        fontSize: 16,
-    },
-    text: {
-        marginTop: 16,
-        color: "#1B4371",
-        textAlign: "center",
+        color: COLORS.linkText,
     },
 });

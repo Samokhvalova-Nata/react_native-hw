@@ -1,7 +1,7 @@
 import { View, Image } from 'react-native';
 import BgImage from '../../assets/images/image-bg.jpg';
 
-function Background() {
+export default function Background() {
     return (
         <View
             style={{
@@ -18,5 +18,3 @@ function Background() {
         </View>
     );
 };
-
-export default Background;

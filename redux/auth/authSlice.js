@@ -15,7 +15,7 @@ export const authSlice = createSlice({
             reducer(state, action) {
                 state.auth.push(action.payload);
             },
-            prepare(name, number) {
+            prepare(name, email) {
                     return{
                         payload: {
                             name,

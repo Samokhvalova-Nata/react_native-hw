@@ -1,13 +1,11 @@
 import { StyleSheet, Text, View, Image } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import { COLORS } from "../../common/vars";
-// import photo from "../assets/images/forest.jpg"
-import { useNavigation, useRoute } from "@react-navigation/native";
 
-function PostItem({ title, comments, location, url }) {
+
+export default function PostItem({ title, comments, location, url }) {
   const navigation = useNavigation();
-  const photourl = url;
 
   return (
     <View style={styles.postContainer}>
@@ -17,27 +15,22 @@ function PostItem({ title, comments, location, url }) {
       <Text style={styles.postTitle}>{title}</Text>
       <View style={styles.postDetails}>
         <View style={styles.postComments}>
-          <Feather
-            name="message-circle"
-            size={24}
-            style={styles.postIcon}
+          <Feather name="message-circle" size={24} style={styles.postIcon}
             onPress={() => navigation.navigate("Comments")}
           />
           <Text style={styles.commentText}>{comments}</Text>
         </View>
         <View style={styles.postLocation}>
           <Feather name="map-pin" size={24} style={styles.postIcon} />
-          <Text
-            style={styles.locationText}
-            onPress={() => navigation.navigate("Map")}
-          >
+          <Text style={styles.locationText}
+            onPress={() => navigation.navigate("Map")}>
             {location}
           </Text>
         </View>
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   postContainer: {
@@ -51,7 +44,7 @@ const styles = StyleSheet.create({
   },
   postPhoto: {
     width: "100%",
-    // height: 240,
+    height: 240,
     borderRadius: 8,
   },
   postTitle: {
@@ -74,7 +67,7 @@ const styles = StyleSheet.create({
   postLocation: {
     display: "flex",
     flexDirection: "row",
-    // gap: 4,
+    gap: 4,
   },
   commentText: {
     fontFamily: "Roboto-Regular",
@@ -91,5 +84,3 @@ const styles = StyleSheet.create({
     color: COLORS.secondaryText,
   },
 });
-
-export default PostItem;

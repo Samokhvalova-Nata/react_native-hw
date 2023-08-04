@@ -1,8 +1,5 @@
-import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { AntDesign } from "@expo/vector-icons";
-import Background from "../../Components/Background/Background";
 import {
   StyleSheet,
   TouchableWithoutFeedback,
@@ -11,16 +8,18 @@ import {
   View,
   TextInput,
   TouchableOpacity,
-  Text,
-  Image,
-  Dimensions,
+  Text
 } from "react-native";
+import { COLORS } from "../../common/vars";
+import Background from "../../Components/Background/Background";  
+import Avatar from "../../Components/Avatar/Avatar";
+import MainButton from "../../Components/Buttons/MainButton";
+import AuthLinkButton from "../../Components/Buttons/AuthLinkButton";
 
 export default function RegisterScreen() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [avatar, setAvatar] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [isShownPsw, setIsShownPsw] = useState(false);
   const [keyboardStatus, setKeyboardStatus] = useState(false);
@@ -63,10 +62,6 @@ export default function RegisterScreen() {
     }
   };
 
-  const handleAvatarBtn = () => {
-    setAvatar(!avatar);
-  };
-
   return (
     <>
       <Background />
@@ -75,43 +70,18 @@ export default function RegisterScreen() {
           style={styles.container}
           behavior={Platform.OS == "ios" ? "padding" : "height"}
         >
-          <View
-            style={{
-              ...styles.form,
-              // width: dimensions,
-            }}
-          >
-            <View style={styles.avatarWrap}>
-              {avatar && (
-                <Image
-                  source={require("../../assets/images/avatar.jpg")}
-                  alt="User photo"
-                  style={styles.avatar}
-                />
-              )}
-              <TouchableOpacity style={styles.btnAdd} onPress={handleAvatarBtn}>
-                {!avatar ? (
-                  <AntDesign name="pluscircleo" size={25} color="#FF6C00" />
-                ) : (
-                  <AntDesign
-                    name="closecircleo"
-                    size={25}
-                    color="#BDBDBD"
-                    iconStyle={{ borderColor: "black" }}
-                  />
-                )}
-              </TouchableOpacity>
-            </View>
-
+          <View style={styles.form}>
+            <Avatar />
             <Text style={styles.formTitle}>Реєстрація</Text>
             <TextInput
               style={[
                 styles.input,
                 {
-                  borderColor: isFocused === "username" ? "#FF6C00" : "#E8E8E8",
+                  borderColor:
+                    isFocused === "username" ? COLORS.accent : COLORS.borders,
                 },
               ]}
-              placeholderTextColor={"#BDBDBD"}
+              placeholderTextColor={COLORS.secondaryText}
               placeholder="Логін"
               value={name}
               textContentType="username"
@@ -126,10 +96,12 @@ export default function RegisterScreen() {
                 styles.input,
                 {
                   borderColor:
-                    isFocused === "emailAddress" ? "#FF6C00" : "#E8E8E8",
+                    isFocused === "emailAddress"
+                      ? COLORS.accent
+                      : COLORS.borders,
                 },
               ]}
-              placeholderTextColor={"#BDBDBD"}
+              placeholderTextColor={COLORS.secondaryText}
               placeholder="Адреса електронної пошти"
               value={email}
               textContentType="emailAddress"
@@ -146,10 +118,10 @@ export default function RegisterScreen() {
                   { marginBottom: 0 },
                   {
                     borderColor:
-                      isFocused === "password" ? "#FF6C00" : "#E8E8E8",
+                      isFocused === "password" ? COLORS.accent : COLORS.borders,
                   },
                 ]}
-                placeholderTextColor={"#BDBDBD"}
+                placeholderTextColor={COLORS.secondaryText}
                 placeholder="Пароль"
                 value={password}
                 textContentType="password"
@@ -172,33 +144,17 @@ export default function RegisterScreen() {
 
             {!keyboardStatus && (
               <View>
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  style={styles.btnSubmit}
+                <MainButton
+                  text="Зареєстуватися"
                   onPress={() => handleRegisterSubmit(name, email, password)}
-                >
-                  <Text title="Registration" style={styles.btnSubmitTitle}>
-                    Зареєстуватися
-                  </Text>
-                </TouchableOpacity>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    gap: 5,
-                  }}
-                >
-                  <Text style={styles.text}>Вже є акаунт?</Text>
-                  <Text
-                    style={[styles.text, { textDecorationLine: "underline" }]}
-                    onPress={() => navigation.navigate("Login")}
-                  >
-                    Увійти
-                  </Text>
-                </View>
+                />
+                <AuthLinkButton
+                  text="Вже є акаунт?"
+                  linkText="Увійти"
+                  onPress={() => navigation.navigate("Login")}
+                />
               </View>
             )}
-            <StatusBar style="auto" />
           </View>
         </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
@@ -210,9 +166,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "flex-end",
-    // alignItems: 'center',
   },
-
   form: {
     position: "relative",
     paddingTop: 92,
@@ -220,36 +174,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderTopStartRadius: 25,
     borderTopEndRadius: 25,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: COLORS.mainBcg,
     fontFamily: "Roboto-Regular",
     fontSize: 16,
   },
-  avatarWrap: {
-    position: "absolute",
-    top: -60,
-    left: "50%",
-    transform: [{ translateX: -50 }],
-    width: 120,
-    height: 120,
-    backgroundColor: "#F6F6F6",
-    borderRadius: 16,
-  },
-  avatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 16,
-  },
-  btnAdd: {
-    width: 25,
-    height: 25,
-    overflow: "hidden",
-    position: "absolute",
-    left: "90%",
-    top: "65%",
-  },
   formTitle: {
     fontFamily: "Roboto-Medium",
-    color: "#212121",
+    color: COLORS.mainText,
     marginBottom: 33,
     fontSize: 30,
     textAlign: "center",
@@ -258,9 +189,9 @@ const styles = StyleSheet.create({
     fontFamily: "Roboto-Regular",
     height: 50,
     borderRadius: 8,
-    backgroundColor: "#F6F6F6",
+    backgroundColor: COLORS.secondaryBcg,
     borderWidth: 1,
-    color: "#212121",
+    color: COLORS.mainText,
     padding: 16,
     marginBottom: 16,
   },
@@ -270,24 +201,6 @@ const styles = StyleSheet.create({
     top: 14,
   },
   btnShowPasswordText: {
-    color: "#1B4371",
-  },
-  btnSubmit: {
-    height: 51,
-    backgroundColor: "#FF6C00",
-    borderRadius: 100,
-    marginTop: 43,
-    alignItems: "center",
-    paddingTop: 16,
-    paddingBottom: 16,
-  },
-  btnSubmitTitle: {
-    color: "#FFFFFF",
-    fontSize: 16,
-  },
-  text: {
-    marginTop: 16,
-    color: "#1B4371",
-    textAlign: "center",
+    color: COLORS.linkText,
   },
 });

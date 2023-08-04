@@ -5,4 +5,5 @@ export const COLORS = {
 	accent: "#FF6C00",
     mainBcg: "#FFFFFF",
     secondaryBcg: "#F6F6F6",
+    borders: "#E8E8E8",
 };

@@ -1,13 +1,11 @@
-import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { StyleSheet, Text, View, } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { useNavigation } from "@react-navigation/native";
+import { Feather } from '@expo/vector-icons';
+import { COLORS } from "./../common/vars";
 import PostsScreen from "././Tabs/PostsScreen";
 import CreatePostsScreen from "././Tabs/CreatePostsScreen";
 import ProfileScreen from "././Tabs/ProfileScreen";
-// import { Ionicons } from '@expo/vector-icons';
-import { Feather } from '@expo/vector-icons';
-import { useNavigation, useRoute } from "@react-navigation/native";
-import { COLORS } from "./../common/vars";
 
 
 const Tabs = createBottomTabNavigator();
@@ -16,21 +14,16 @@ export default function HomeScreen() {
     const navigation = useNavigation();
 
     return (
-        <Tabs.Navigator
-            initialRouteName="ProfileScreen"
+        <Tabs.Navigator initialRouteName="PostsScreen"
             screenOptions={({ route }) => ({
                 tabBarShowLabel: false,
                 headerTitleAlign: "center",
                 headerStyle: styles.header,
-                
-                tabBarStyle: {
-                    paddingHorizontal: 50,
-                    height: 71,
-                },
+                headerTitleStyle: styles.title,
+                tabBarStyle: styles.tab,
 
-                tabBarIcon: ({ focused, color }) => {
+                tabBarIcon: ({ focused }) => {
                     let iconName;
-
                     if (route.name === "PostsScreen") {
                         iconName = "grid"
                     }
@@ -40,7 +33,6 @@ export default function HomeScreen() {
                     if (route.name === "ProfileScreen") {
                         iconName = "user"
                     } 
-
                     return (
                         <View style={{
                             ...styles.iconsTab,
@@ -56,37 +48,22 @@ export default function HomeScreen() {
                 },
             })}
         >
-            
             <Tabs.Screen name="PostsScreen" component={PostsScreen}
                 options={{
                     title: "Публікації",
-                    headerTintColor: "#212121",
-                    headerTitleStyle: {
-                        fontWeight: 500,
-                        fontSize: 17,
-                        textAlign: 'center',
-                    },
-
                     headerRight: () => (
                         <Feather name="log-out" size={24} color={COLORS.secondaryText} style={{ marginRight: 10 }}
-                        onPress={() => navigation.navigate("Login")} />
-                        
+                        onPress={() => navigation.navigate("Login")}/>
                     )
                 }} />
             <Tabs.Screen name="CreatePostsScreen" component={CreatePostsScreen}
                 options={{
                     title: "Створити публікацію",
-                    headerTintColor: "#212121",
-                    headerTitleStyle: {
-                        fontWeight: 500,
-                        fontSize: 17,
-                        textAlign: 'center',
-                    },
                     tabBarStyle: {
                         display: "none",
                     },
                     headerLeft: () => (
-                        <Feather name="arrow-left" size={24} color={COLORS.secondaryText} style={{ marginLeft: 10 }}
+                        <Feather name="arrow-left" size={24} color={'#212121CC'} style={{ marginLeft: 10 }}
                         onPress={() => navigation.navigate("PostsScreen")} />
                     )
                 }}/>
@@ -100,27 +77,19 @@ export default function HomeScreen() {
 };
 
 const styles = StyleSheet.create({
-    // container: {
-    //     flex: 1,
-    //     justifyContent: "center",
-    //     alignItems: "center",
-    //     paddingHorizontal: 16,
-    //     backgroundColor: '#FFFFFF',
-    //     borderTopWidth: 0.5,
-    //     borderBottomWidth: -0.5,
-    //     borderTopColor: 'rgba(0, 0, 0, 0.30)',
-    //     borderBottomColor: 'rgba(0, 0, 0, 0.30)',
-    // },
     header: {
         height: 88,
-        
     },
     title: {
-        fontFamily: 'Roboto-Medium',
-        color: "#212121",
-        marginBottom: 33,
-        fontSize: 30,
+        fontWeight: 500,
+        fontSize: 17,
+        letterSpacing: -0.4,
         textAlign: "center",
+        color: COLORS.mainText,
+    },
+    tab: {
+        paddingHorizontal: 50,
+        height: 71,
     },
     iconsTab: {
         display: "flex",

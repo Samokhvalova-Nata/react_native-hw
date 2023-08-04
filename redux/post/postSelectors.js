@@ -1,1 +1,1 @@
-export const getPosts = state => state.posts;
+export const getPosts = state => state.posts.postsList;

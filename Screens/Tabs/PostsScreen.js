@@ -1,17 +1,16 @@
-import React from "react";
-import PostItem from "../../Components/PostItem/PostItem";
-import { StyleSheet, Text, View, Image, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, Image, ScrollView, Dimensions } from 'react-native';
 import { useSelector } from "react-redux";
 import { COLORS } from "../../common/vars";
 import { getPosts } from "../../redux/post/postSelectors";
 import { getUserEmail, getUserName } from "../../redux/auth/authSelectors";
+import PostItem from "../../Components/Posts/PostItem";
 
 
 export default function PostsScreen() {
     const posts = useSelector(getPosts);
     const name = useSelector(getUserName);
     const email = useSelector(getUserEmail);
-    //TODO const avatar = useSelector(getUserAvatar);
+    // const avatar = useSelector(getUserAvatar);
 
     return (
         <ScrollView>
@@ -25,7 +24,7 @@ export default function PostsScreen() {
                     <Text style={styles.userEmail}>{email}</Text>
                 </View>
             </View>
-            {posts && 
+            {(posts.length !== 0) && 
                 posts.map(({ id, title, comments, location, photo }) => (
                     <PostItem
                         key={id}
@@ -46,11 +45,13 @@ const styles = StyleSheet.create({
         justifyContent: "flex-start",
         paddingHorizontal: 16,
         paddingTop: 32,
+        paddingBottom: 45,
         backgroundColor: COLORS.mainBcg,
         borderTopWidth: 0.5,
         borderBottomWidth: -0.5,
         borderTopColor: 'rgba(0, 0, 0, 0.30)',
         borderBottomColor: 'rgba(0, 0, 0, 0.30)',
+        minHeight: Dimensions.get("window").height - 150,
     },
     userInfo: {
         display: 'flex',
