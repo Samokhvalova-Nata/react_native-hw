@@ -14,7 +14,7 @@ export default function HomeScreen() {
     const navigation = useNavigation();
 
     return (
-        <Tabs.Navigator initialRouteName="PostsScreen"
+        <Tabs.Navigator initialRouteName="CreatePostsScreen"
             screenOptions={({ route }) => ({
                 tabBarShowLabel: false,
                 headerTitleAlign: "center",

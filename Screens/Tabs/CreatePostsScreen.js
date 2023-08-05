@@ -1,27 +1,95 @@
-import React, { useState } from "react";
-import { KeyboardAvoidingView } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Image, ImageBackground, KeyboardAvoidingView } from "react-native";
 import { ScrollView, StyleSheet, Text, View, TouchableWithoutFeedback, Keyboard,  TouchableOpacity, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { COLORS } from "./../../common/vars";
+import { Camera } from "expo-camera";
+import * as Location from "expo-location";
+import * as MediaLibrary from "expo-media-library";
 
 
 export default function CreatePostsScreen() {
     const [title, setTitle] = useState('');
-    // const [photo, setPhoto] = useState('');
+    const [photo, setPhoto] = useState('');
     const [location, setLocation] = useState('');
 
+    const [hasPermission, setHasPermission] = useState(null);
+    const [cameraRef, setCameraRef] = useState(null);
+    const [type, setType] = useState(Camera.Constants.Type.back);
+
+    useEffect(() => {
+        // camera permission
+        (async () => {
+            const { status } = await Camera.requestCameraPermissionsAsync();
+            await MediaLibrary.requestPermissionsAsync();
+            setHasPermission(status === "granted");
+        })();
+
+        // location permission
+        (async () => {
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== "granted") {
+                console.log("Permission to access location was denied");
+            }
+
+            let location = await Location.getCurrentPositionAsync({});
+            const coords = {
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
+            };
+            setLocation(coords);
+        })();
+        }, []);
+
+        if (hasPermission === null) {
+            return <View />;
+        }
+        if (hasPermission === false) {
+            // TODO style to text
+            return <Text>No access to camera</Text>;
+        }
+
+    const makePhoto = async () => {
+        if (cameraRef) {
+            const { uri } = await cameraRef.takePictureAsync();
+            setPhoto(uri);
+            // await MediaLibrary.createAssetAsync(uri);
+        }
+    };
+    
     return (
         <ScrollView>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={styles.container}>
-                    <View style={styles.postPhotoWrap}>
-                        <TouchableOpacity style={styles.cameraBtn} onPress={() => { }}>
-                            <Ionicons name="ios-camera" size={24} color={COLORS.secondaryText} />
+                    {photo ? (
+                    <ImageBackground source={{uri: photo}} style={styles.postPhotoWrap}>
+                            <TouchableOpacity style={{ ...styles.cameraBtn, opacity: 0.4 }} onPress={() => {
+                                setPhoto('');
+                            }}>
+                                <Ionicons name="ios-camera" size={24} color={COLORS.mainBcg}/>
                         </TouchableOpacity>
-                    </View>
+                    </ImageBackground>
+                    ) : (
+                    <Camera style={styles.postPhotoWrap} 
+                            type={type}
+                            ref={setCameraRef}>
+                        <MaterialCommunityIcons name="camera-flip" size={22} color={COLORS.secondaryText}
+                            style={styles.flipContainer}
+                            onPress={() => {
+                                setType(
+                                    type === Camera.Constants.Type.back
+                                    ? Camera.Constants.Type.front
+                                    : Camera.Constants.Type.back
+                                );}}
+                        />
+                        <TouchableOpacity style={styles.cameraBtn} onPress={makePhoto}>
+                            <Ionicons name="ios-camera" size={24} color={COLORS.secondaryText}/>
+                        </TouchableOpacity>
+                    </Camera>    
+                    )}
                     <Text style={styles.text}>Завантажте фото</Text>
-
                     <KeyboardAvoidingView
                         behavior={Platform.OS == "ios" ? "padding" : "height"}>
                         <TextInput
@@ -46,12 +114,12 @@ export default function CreatePostsScreen() {
                         activeOpacity={0.8}
                         style={{
                             ...styles.btn,
-                            backgroundColor: title && location ? COLORS.accent : COLORS.secondaryBcg,
+                            backgroundColor: photo && title && location ? COLORS.accent : COLORS.secondaryBcg,
                         }}
                         onPress={() => { }}>
                         <Text title="Login" style={{
                             ...styles.btnTitle,
-                            color: title && location ? COLORS.mainBcg : COLORS.secondaryText,
+                            color: photo && title && location ? COLORS.mainBcg : COLORS.secondaryText,
                         }}
                         >Опубліковати
                         </Text>
@@ -77,12 +145,27 @@ const styles = StyleSheet.create({
         borderBottomColor: 'rgba(0, 0, 0, 0.30)',
     },
     postPhotoWrap: {
-        width: '100%',
+        flex: 1,
+        // width: '100%',
         height: 240,
+        overflow: 'hidden',
         backgroundColor: COLORS.secondaryBcg,
+        borderColor: COLORS.borders,
+        borderStyle: 'solid',
+        borderWidth: 1,
         borderRadius: 8,
         justifyContent: "center",
 		alignItems: "center",
+    },
+    photo: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 8,
+    },
+    flipContainer: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
     },
     cameraBtn: {
 		width: 60,
