@@ -6,12 +6,13 @@ import { getUserEmail, getUserName } from "../../redux/auth/authSelectors";
 import PostItem from "../../Components/Posts/PostItem";
 
 
-export default function PostsScreen() {
+export default function PostsScreen({route}) {
     const posts = useSelector(getPosts);
     const name = useSelector(getUserName);
     const email = useSelector(getUserEmail);
     // const avatar = useSelector(getUserAvatar);
-
+    console.log('route.params', route.params)
+    
     return (
         <ScrollView>
             <View style={styles.container}>

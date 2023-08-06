@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Image, ImageBackground, KeyboardAvoidingView } from "react-native";
-import { ScrollView, StyleSheet, Text, View, TouchableWithoutFeedback, Keyboard,  TouchableOpacity, TextInput } from 'react-native';
+import { ImageBackground, KeyboardAvoidingView } from "react-native";
+import { ScrollView, StyleSheet, Text, View, TouchableWithoutFeedback, Keyboard, TouchableOpacity, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -8,6 +8,7 @@ import { COLORS } from "./../../common/vars";
 import { Camera } from "expo-camera";
 import * as Location from "expo-location";
 import * as MediaLibrary from "expo-media-library";
+import { useNavigation } from "@react-navigation/native";
 
 
 export default function CreatePostsScreen() {
@@ -18,6 +19,7 @@ export default function CreatePostsScreen() {
     const [hasPermission, setHasPermission] = useState(null);
     const [cameraRef, setCameraRef] = useState(null);
     const [type, setType] = useState(Camera.Constants.Type.back);
+    const navigation = useNavigation();
 
     useEffect(() => {
         // camera permission
@@ -55,10 +57,13 @@ export default function CreatePostsScreen() {
         if (cameraRef) {
             const { uri } = await cameraRef.takePictureAsync();
             setPhoto(uri);
-            // await MediaLibrary.createAssetAsync(uri);
         }
     };
     
+    const sendPost = () => {
+        navigation.navigate("PostsScreen", {photo})
+    }
+
     return (
         <ScrollView>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -72,7 +77,7 @@ export default function CreatePostsScreen() {
                         </TouchableOpacity>
                     </ImageBackground>
                     ) : (
-                    <Camera style={styles.postPhotoWrap} 
+                            <Camera style={{ ...styles.postPhotoWrap }} 
                             type={type}
                             ref={setCameraRef}>
                         <MaterialCommunityIcons name="camera-flip" size={22} color={COLORS.secondaryText}
@@ -105,7 +110,7 @@ export default function CreatePostsScreen() {
                                 placeholder="Місцевість..."
                                 placeholderTextColor={COLORS.secondaryText}
                                 style={{...styles.input,  marginBottom: 32, paddingLeft: 28, }}
-                                value={location}
+                                // value={location}
                                 onChangeText={value => setLocation(value)}
                             />
                         </View>
@@ -116,7 +121,7 @@ export default function CreatePostsScreen() {
                             ...styles.btn,
                             backgroundColor: photo && title && location ? COLORS.accent : COLORS.secondaryBcg,
                         }}
-                        onPress={() => { }}>
+                        onPress={sendPost}>
                         <Text title="Login" style={{
                             ...styles.btnTitle,
                             color: photo && title && location ? COLORS.mainBcg : COLORS.secondaryText,
@@ -146,13 +151,12 @@ const styles = StyleSheet.create({
     },
     postPhotoWrap: {
         flex: 1,
-        // width: '100%',
         height: 240,
         overflow: 'hidden',
         backgroundColor: COLORS.secondaryBcg,
-        borderColor: COLORS.borders,
-        borderStyle: 'solid',
-        borderWidth: 1,
+        // borderColor: COLORS.borders,
+        // borderStyle: 'solid',
+        // borderWidth: 1,
         borderRadius: 8,
         justifyContent: "center",
 		alignItems: "center",
