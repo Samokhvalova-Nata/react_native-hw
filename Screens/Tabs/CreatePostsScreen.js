@@ -14,7 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 export default function CreatePostsScreen() {
     const [title, setTitle] = useState('');
     const [photo, setPhoto] = useState('');
-    const [location, setLocation] = useState('');
+    const [geolocation, setGeoLocation] = useState('');
 
     const [hasPermission, setHasPermission] = useState(null);
     const [cameraRef, setCameraRef] = useState(null);
@@ -41,7 +41,7 @@ export default function CreatePostsScreen() {
                 latitude: location.coords.latitude,
                 longitude: location.coords.longitude,
             };
-            setLocation(coords);
+            setGeoLocation(coords);
         })();
         }, []);
 

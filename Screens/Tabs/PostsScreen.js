@@ -1,9 +1,10 @@
-import { StyleSheet, Text, View, Image, ScrollView, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, Image, ScrollView, Dimensions, FlatList } from 'react-native';
 import { useSelector } from "react-redux";
 import { COLORS } from "../../common/vars";
 import { getPosts } from "../../redux/post/postSelectors";
 import { getUserEmail, getUserName } from "../../redux/auth/authSelectors";
 import PostItem from "../../Components/Posts/PostItem";
+import { useEffect, useState } from 'react';
 
 
 export default function PostsScreen({route}) {
@@ -11,10 +12,21 @@ export default function PostsScreen({route}) {
     const name = useSelector(getUserName);
     const email = useSelector(getUserEmail);
     // const avatar = useSelector(getUserAvatar);
-    console.log('route.params', route.params)
+
+    const [postsPhoto, setPostsPhoto] = useState([]);
+    // console.log('route.params', route.params)
+
+    useEffect(() => {
+        if (route.params) {
+            setPostsPhoto(prev=> [...prev, route.params])
+        }
+        
+    }, [route.params]);
+
+    console.log('postsPhoto', postsPhoto)
     
     return (
-        <ScrollView>
+        // <ScrollView>
             <View style={styles.container}>
             <View style={styles.userInfo}>
                 <Image style={styles.avatar}
@@ -35,8 +47,19 @@ export default function PostsScreen({route}) {
                         url={photo}
                     />))
             }
+
+                    {/* <FlatList data={postsPhoto}
+                    keyExtractor={(item, indx) => indx.toString()}
+                renderItem={({ item }) => (
+                        <View>
+                            <Image source={{uri: item.photo}} style={styles.postPhoto}/>
+                        </View> */}
+                        
+                        {/* )} /> */}
+            
+
         </View>
-        </ScrollView>
+        // {/* </ScrollView> */}
     )
 };
 
@@ -80,4 +103,9 @@ const styles = StyleSheet.create({
         color: COLORS.mainText,
         fontSize: 11,
     },
+    postPhoto: {
+    width: "100%",
+    height: 240,
+    borderRadius: 8,
+  },
 });
