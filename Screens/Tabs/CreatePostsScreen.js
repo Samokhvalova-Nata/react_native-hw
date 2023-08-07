@@ -76,7 +76,7 @@ export default function CreatePostsScreen() {
         setGeoLocation((geoLocation) => ({
             ...geoLocation
         }));
-        navigation.navigate("DefaultPostScreen");
+        navigation.navigate("PostsScreen");
         dispatch(addPost( title, photoLocation, photo, geoLocation));
         removePost();
     };

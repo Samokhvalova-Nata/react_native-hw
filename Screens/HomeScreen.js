@@ -50,7 +50,11 @@ export default function HomeScreen() {
         >
             <Tabs.Screen name="PostsScreen" component={PostsScreen}
                 options={{
-                    headerShown: false,
+                    title: "Публікації",
+                    headerRight: () => (
+                        <Feather name="log-out" size={24} color={COLORS.secondaryText} style={{ marginRight: 10 }}
+                        onPress={() => navigation.navigate("Login")}/>
+                    )
                 }} />
             <Tabs.Screen name="CreatePostsScreen" component={CreatePostsScreen}
                 options={{
