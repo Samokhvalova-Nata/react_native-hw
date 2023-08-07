@@ -7,7 +7,7 @@ const initPosts = {
         "title": "Ліс",
         "comments": "0",
         "likes": "153",
-        "location": "Ukraine",
+        "photoLocation": "Ukraine",
         "photo": "../../assets/images/forest.jpg",
     },
     {
@@ -15,7 +15,7 @@ const initPosts = {
         "title": "Захід на Чорному морі",
         "comments": "3",
         "likes": "200",
-        "location": "Ukraine",
+        "photoLocation": "Ukraine",
         "photo": "../../assets/images/black-sea.jpg",
     },
     {
@@ -23,7 +23,7 @@ const initPosts = {
         "title": "Старий будиночок у Венеції",
         "comments": "50",
         "likes": "200",
-        "location": "Italy",
+        "photoLocation": "Italy",
         "photo": "../../assets/images/house.jpg",
     }
     ]}
@@ -36,15 +36,14 @@ export const postSlice = createSlice({
             reducer(state, action) {
                 state.postsList.push(action.payload);
             },
-            prepare(title, comments, location, photo, likes) {
+            prepare(title, photoLocation, photo, geoLocation) {
                 return {
                     payload: {
                         id: nanoid(),
                         title,
-                        comments,
-                        location,
+                        photoLocation,
                         photo,
-                        likes,
+                        geoLocation
                     },
                 };
             },

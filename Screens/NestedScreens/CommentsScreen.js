@@ -1,12 +1,12 @@
 import { StyleSheet, View, Dimensions, Image} from "react-native";
-import { COLORS } from "../common/vars";
+import { COLORS } from "../../common/vars";
 
 
 export default function CommentsScreen() {
     return (
         <View style={styles.container}>
             <View style={styles.postPhotoWrap}>
-                <Image source={require('../assets/images/black-sea.jpg')}
+                <Image source={require('../../assets/images/black-sea.jpg')}
                     style={styles.postPhoto} />
             </View>
         </View>

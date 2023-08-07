@@ -9,17 +9,23 @@ import { Camera } from "expo-camera";
 import * as Location from "expo-location";
 import * as MediaLibrary from "expo-media-library";
 import { useNavigation } from "@react-navigation/native";
+import { useDispatch } from "react-redux";
+import { addPost } from "../../redux/post/postSlice";
 
 
 export default function CreatePostsScreen() {
-    const [title, setTitle] = useState('');
+    const dispatch = useDispatch();
+    const navigation = useNavigation();
+
     const [photo, setPhoto] = useState('');
-    const [geolocation, setGeoLocation] = useState('');
+    const [title, setTitle] = useState('');
+    const [photoLocation, setPhotoLocation] = useState("");
+    const [geoLocation, setGeoLocation] = useState('');
 
     const [hasPermission, setHasPermission] = useState(null);
     const [cameraRef, setCameraRef] = useState(null);
     const [type, setType] = useState(Camera.Constants.Type.back);
-    const navigation = useNavigation();
+    const [isFocused, setIsFocused] = useState(null); 
 
     useEffect(() => {
         // camera permission
@@ -59,10 +65,21 @@ export default function CreatePostsScreen() {
             setPhoto(uri);
         }
     };
-    
+
+    const removePost = () => {
+        setPhoto('');
+        setTitle('');
+        setPhotoLocation('');
+    };
+
     const sendPost = () => {
-        navigation.navigate("PostsScreen", {photo})
-    }
+        setGeoLocation((geoLocation) => ({
+            ...geoLocation
+        }));
+        navigation.navigate("DefaultPostScreen");
+        dispatch(addPost( title, photoLocation, photo, geoLocation));
+        removePost();
+    };
 
     return (
         <ScrollView>
@@ -77,7 +94,7 @@ export default function CreatePostsScreen() {
                         </TouchableOpacity>
                     </ImageBackground>
                     ) : (
-                            <Camera style={{ ...styles.postPhotoWrap }} 
+                            <Camera style={styles.postPhotoWrap} 
                             type={type}
                             ref={setCameraRef}>
                         <MaterialCommunityIcons name="camera-flip" size={22} color={COLORS.secondaryText}
@@ -94,24 +111,40 @@ export default function CreatePostsScreen() {
                         </TouchableOpacity>
                     </Camera>    
                     )}
-                    <Text style={styles.text}>Завантажте фото</Text>
+
+                    {photo
+                        ? <Text style={styles.text}>Редагувати фото</Text>
+                        : <Text style={styles.text}>Завантажте фото</Text>}
+
                     <KeyboardAvoidingView
                         behavior={Platform.OS == "ios" ? "padding" : "height"}>
                         <TextInput
+                            name='title'
                             placeholder="Назва..."
                             placeholderTextColor={COLORS.secondaryText}
-                            style={styles.input}
+                            style={
+                                isFocused === 'title'
+                                    ? { ...styles.input, borderColor: COLORS.accent }
+                                    : { ...styles.input }}
                             value={title}
                             onChangeText={value => setTitle(value)}
+                            onFocus={() => setIsFocused('title')}
+                            onBlur={() => setIsFocused(null)}
                         />
                         <View >
                             <Feather name="map-pin" size={24} color={COLORS.secondaryText} style={styles.locationIcon} />
                             <TextInput
+                                name='location'
                                 placeholder="Місцевість..."
                                 placeholderTextColor={COLORS.secondaryText}
-                                style={{...styles.input,  marginBottom: 32, paddingLeft: 28, }}
-                                // value={location}
-                                onChangeText={value => setLocation(value)}
+                                style={
+                                    isFocused === 'location'
+                                        ? { ...styles.input, marginBottom: 32, paddingLeft: 28, borderColor: COLORS.accent }
+                                        : { ...styles.input, marginBottom: 32, paddingLeft: 28}}
+                                value={photoLocation}
+                                onChangeText={value => setPhotoLocation(value)}
+                                onFocus={() => setIsFocused('location')}
+                                onBlur={() => setIsFocused(null)}
                             />
                         </View>
                     </KeyboardAvoidingView>
@@ -119,17 +152,17 @@ export default function CreatePostsScreen() {
                         activeOpacity={0.8}
                         style={{
                             ...styles.btn,
-                            backgroundColor: photo && title && location ? COLORS.accent : COLORS.secondaryBcg,
+                            backgroundColor: photo && title && photoLocation ? COLORS.accent : COLORS.secondaryBcg,
                         }}
                         onPress={sendPost}>
                         <Text title="Login" style={{
                             ...styles.btnTitle,
-                            color: photo && title && location ? COLORS.mainBcg : COLORS.secondaryText,
+                            color: photo && title && photoLocation ? COLORS.mainBcg : COLORS.secondaryText,
                         }}
                         >Опубліковати
                         </Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.trashBtn} onPress={() => { }}>
+                    <TouchableOpacity style={styles.trashBtn} onPress={removePost}>
                         <Feather name="trash-2" size={24} color={COLORS.secondaryText} />
                     </TouchableOpacity>
                 </View >
@@ -154,9 +187,9 @@ const styles = StyleSheet.create({
         height: 240,
         overflow: 'hidden',
         backgroundColor: COLORS.secondaryBcg,
-        // borderColor: COLORS.borders,
-        // borderStyle: 'solid',
-        // borderWidth: 1,
+        borderColor: COLORS.borders,
+        borderStyle: 'solid',
+        borderWidth: 1,
         borderRadius: 8,
         justifyContent: "center",
 		alignItems: "center",

@@ -14,7 +14,7 @@ export default function HomeScreen() {
     const navigation = useNavigation();
 
     return (
-        <Tabs.Navigator initialRouteName="CreatePostsScreen"
+        <Tabs.Navigator initialRouteName="PostsScreen"
             screenOptions={({ route }) => ({
                 tabBarShowLabel: false,
                 headerTitleAlign: "center",
@@ -50,11 +50,7 @@ export default function HomeScreen() {
         >
             <Tabs.Screen name="PostsScreen" component={PostsScreen}
                 options={{
-                    title: "Публікації",
-                    headerRight: () => (
-                        <Feather name="log-out" size={24} color={COLORS.secondaryText} style={{ marginRight: 10 }}
-                        onPress={() => navigation.navigate("Login")}/>
-                    )
+                    headerShown: false,
                 }} />
             <Tabs.Screen name="CreatePostsScreen" component={CreatePostsScreen}
                 options={{

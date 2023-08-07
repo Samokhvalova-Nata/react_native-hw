@@ -1,24 +1,38 @@
-import { StyleSheet, Text, View, Image } from "react-native";
+import { StyleSheet, Text, View, ImageBackground, TouchableOpacity } from "react-native";
 import { Feather, FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { COLORS } from "../../common/vars";
+import { useDispatch } from "react-redux";
+import { deletePost } from "../../redux/post/postSlice";
 
 
-export default function PostProfileItem({ title, comments, likes, location, url }) {
+export default function PostProfileItem({id, title, comments=0, likes=0, photoLocation, url }) {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
 
   return (
     <View style={styles.postContainer}>
       <View style={styles.postPhotoWrap}>
-        <Image source={{uri: url}} style={styles.postPhoto} alt={title} />
+        <ImageBackground
+          source={{ uri: url }}
+          style={styles.postPhoto}
+          alt={title}
+        >
+          <TouchableOpacity
+            style={styles.trashBtn}
+            onPress={() => dispatch(deletePost(id))}
+          >
+            <Feather name="trash-2" size={20} color={COLORS.accent} />
+          </TouchableOpacity>
+        </ImageBackground>
       </View>
       <Text style={styles.postTitle}>{title}</Text>
       <View style={styles.postDetails}>
         <View style={styles.postData}>
           <FontAwesome
-            name={comments === "0" ? "comment-o" : "comment"}
+            name={comments === 0 ? "comment-o" : "comment"}
             size={24}
-            color={comments === "0" ? COLORS.secondaryText : COLORS.accent}
+            color={comments === 0 ? COLORS.secondaryText : COLORS.accent}
             onPress={() => navigation.navigate("Comments")}
           />
           <Text style={styles.commentText}>{comments}</Text>
@@ -27,7 +41,7 @@ export default function PostProfileItem({ title, comments, likes, location, url 
           <Feather
             name="thumbs-up"
             size={24}
-            color={likes === "0" ? COLORS.secondaryText : COLORS.accent}
+            color={likes === 0 ? COLORS.secondaryText : COLORS.accent}
             onPress={() => navigation.navigate("Comments")}
           />
           <Text style={styles.commentText}>{likes}</Text>
@@ -36,8 +50,9 @@ export default function PostProfileItem({ title, comments, likes, location, url 
           <Feather name="map-pin" size={24} color={COLORS.secondaryText} />
           <Text
             style={styles.locationText}
-            onPress={() => navigation.navigate("Map")}>
-            {location}
+            onPress={() => navigation.navigate("Map")}
+          >
+            {photoLocation}
           </Text>
         </View>
       </View>
@@ -60,6 +75,17 @@ const styles = StyleSheet.create({
     height: 240,
     borderRadius: 8,
   },
+  trashBtn: {
+    width: 40,
+    height: 40,
+    backgroundColor: COLORS.mainBcg,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
+    top: 10,
+    right: 10,
+  },
   postTitle: {
     marginTop: 8,
     fontFamily: "Roboto-Medium",
@@ -77,7 +103,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   postLocation: {
-    marginLeft: 'auto',
+    marginLeft: "auto",
     display: "flex",
     flexDirection: "row",
     gap: 4,
