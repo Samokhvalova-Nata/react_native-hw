@@ -5,8 +5,13 @@ import { COLORS } from "../../common/vars";
 import Background from '../../Components/Background/Background';
 import MainButton from '../../Components/Buttons/MainButton';
 import AuthLinkButton from "../../Components/Buttons/AuthLinkButton";
+import { useDispatch } from "react-redux";
+import { login } from "../../redux/auth/authOperations";
+import Toast from "react-native-toast-message";
 
 export default function LoginScreen() {
+    const dispatch = useDispatch();
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isFocused, setIsFocused] = useState(false); 
@@ -39,12 +44,23 @@ export default function LoginScreen() {
         setIsShownPsw(!isShownPsw);
     };
 
-    const handleLoginSubmit = (email, password) => {
-        if (email !== '' && password !== '') {
-            console.info(
-                `User with email "${email}" and password "${password}" has been logged in`);
+    const handleLoginSubmit = () => {
+        if (email && password) {
+            dispatch(login({ email, password }));
+            setEmail('');
+            setPassword('');
+            Toast.show({
+                type: "success",
+                text1: `Welcome, ${email} `,
+            });
             navigation.navigate("Home");
+            return;
         };
+
+        Toast.show({
+            type: "error",
+            text1: "You have to fill out all fields",
+        });
     };
 
     return (

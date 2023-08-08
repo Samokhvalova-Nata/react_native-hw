@@ -15,11 +15,17 @@ import Background from "../../Components/Background/Background";
 import Avatar from "../../Components/Avatar/Avatar";
 import MainButton from "../../Components/Buttons/MainButton";
 import AuthLinkButton from "../../Components/Buttons/AuthLinkButton";
+import Toast from "react-native-toast-message";
+import { register } from "../../redux/auth/authOperations";
+import { useDispatch } from "react-redux";
 
 export default function RegisterScreen() {
+  const dispatch = useDispatch();
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [isFocused, setIsFocused] = useState(false);
   const [isShownPsw, setIsShownPsw] = useState(false);
   const [keyboardStatus, setKeyboardStatus] = useState(false);
@@ -51,15 +57,26 @@ export default function RegisterScreen() {
   };
 
   const handleRegisterSubmit = (name, email, password) => {
-    if (name !== "" && email !== "" && password !== "") {
-      console.info(
-        `User "${name}" with email "${email}" and password "${password}" has been registred`
-      );
-      navigation.navigate("Home", {
-        screen: "PostsScreen",
-        params: { user: name, mail: email },
+    if (name && email && password) {
+      // console.info(
+      //   `User "${name}" with email "${email}" and password "${password}" has been registred`
+      // );
+      dispatch(register({ name, email, password }));
+      setName('');
+      setEmail('');
+      setPassword('');
+      Toast.show({
+        type: "success",
+        text1: "Congrats! You have been registred",
       });
+      // navigation.navigate("Login");
+      return;
     }
+
+    Toast.show({
+      type: "error",
+      text1: "You have to fill out all fields",
+    });
   };
 
   return (
@@ -88,7 +105,7 @@ export default function RegisterScreen() {
               autoCompleteType="off"
               onBlur={handleBlur}
               onFocus={() => handleFocus("username")}
-              onChangeText={setName}
+              onChangeText={(value) => setName(value)}
             />
 
             <TextInput
@@ -108,7 +125,7 @@ export default function RegisterScreen() {
               autoCompleteType="off"
               onBlur={handleBlur}
               onFocus={() => handleFocus("emailAddress")}
-              onChangeText={setEmail}
+              onChangeText={(value)=>setEmail(value)}
             />
 
             <View style={(position = "relative")}>
@@ -129,7 +146,7 @@ export default function RegisterScreen() {
                 secureTextEntry
                 onBlur={handleBlur}
                 onFocus={() => handleFocus("password")}
-                onChangeText={setPassword}
+                onChangeText={(value) => setPassword(value)}
               />
 
               <TouchableOpacity
