@@ -18,6 +18,7 @@ import AuthLinkButton from "../../Components/Buttons/AuthLinkButton";
 import Toast from "react-native-toast-message";
 import { register } from "../../redux/auth/authOperations";
 import { useDispatch } from "react-redux";
+import { authStateChange } from "../../redux/auth/authSlice";
 
 export default function RegisterScreen() {
   const dispatch = useDispatch();
@@ -56,19 +57,29 @@ export default function RegisterScreen() {
     setIsShownPsw(!isShownPsw);
   };
 
-  const handleRegisterSubmit = (name, email, password) => {
+  const handleRegisterSubmit = async (name, email, password) => {
     if (name && email && password) {
-      // console.info(
-      //   `User "${name}" with email "${email}" and password "${password}" has been registred`
-      // );
-      dispatch(register({ name, email, password }));
-      setName('');
-      setEmail('');
-      setPassword('');
-      Toast.show({
-        type: "success",
-        text1: "Congrats! You have been registred",
+      dispatch(register( name, email, password))
+        .then((data) => {
+        if (!data || !data.uid) {
+          Toast.show({
+            type: "error",
+            text1: "Oooops! You have not been registred",
+          });
+          return;
+        }
+        dispatch(authStateChange({ stateChange: true }));
+        // console.log('data', data);
+
+        setName('');
+        setEmail('');
+        setPassword('');
+        Toast.show({
+          type: "success",
+          text1: "Congrats! You have been registred",
+        });
       });
+      
       // navigation.navigate("Login");
       return;
     }

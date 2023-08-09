@@ -1,21 +1,22 @@
 import { createSlice, nanoid } from "@reduxjs/toolkit";
 import { login, register } from "./authOperations";
 
-const handleRejected = (state, { payload }) => {
-    state.isLoggedIn = false;
-    state.isAuthLoading = false;
-    state.authError = payload;
-};
+// const handleRejected = (state, { payload }) => {
+//     state.isLoggedIn = false;
+//     state.isAuthLoading = false;
+//     state.authError = payload;
+// };
 
 const initialState = {
     name: '',
     email: '',
     avatar: '',
-    id: null,
+    userId: null,
+    stateChange: false,
 
-    isLoggedIn: false,
-    isAuthLoading: false,
-    authError: null,
+    // isLoggedIn: false,
+    // isAuthLoading: false,
+    // authError: null,
 };
 
 export const authSlice = createSlice({
@@ -24,38 +25,52 @@ export const authSlice = createSlice({
     reducers: {
         updateUserProfile: (state, { payload }) => ({
             ...state,
-            id: payload.id,
-        })
+            name: payload.name,
+            email: payload.email,
+            // avatar: payload.avatar,
+            userId: payload.userId,
+        }),
+        authStateChange: (state, { payload }) => ({
+            ...state,
+            stateChange: payload.stateChange
+        }),
+        authLogOut: () => initialState,
     },
-    extraReducers: builder => {
-        builder
-            .addCase(register.pending, (state) => {
-                state.isAuthLoading = 'register';
-            })
-            .addCase(register.fulfilled, (state, { payload }) => {
-                state.name = payload.name;
-                state.email = payload.email;
-                state.id = payload.id;
-                // state.avatar = action.payload.url;
-                state.isLoggedIn = true;
-                state.isAuthLoading = false;
-                state.authError = null;
-            })
-            .addCase(register.rejected, handleRejected)
+});
 
-            .addCase(login.pending, (state) => {
-                state.isAuthLoading = 'login';
-            })
-            .addCase(login.fulfilled, (state, { payload }) => {
-                state.name = payload.name;
-                state.email = payload.email;
-                state.id = payload.id;
-                // state.avatar = action.payload.url;
-                state.isLoggedIn = true;
-                state.isAuthLoading = false;
-                state.authError = null;
-            })
-            .addCase(login.rejected, handleRejected)
+export const authReducer = authSlice.reducer;
+export const { updateUserProfile, authStateChange, authLogOut } = authSlice.actions;
+
+
+// extraReducers: builder => {
+//         builder
+//             .addCase(register.pending, (state) => {
+//                 state.isAuthLoading = 'register';
+//             })
+//             .addCase(register.fulfilled, (state, { payload }) => {
+//                 state.name = payload.name;
+//                 state.email = payload.email;
+//                 state.id = payload.id;
+//                 // state.avatar = action.payload.url;
+//                 state.isLoggedIn = true;
+//                 state.isAuthLoading = false;
+//                 state.authError = null;
+//             })
+//             .addCase(register.rejected, handleRejected)
+
+//             .addCase(login.pending, (state) => {
+//                 state.isAuthLoading = 'login';
+//             })
+//             .addCase(login.fulfilled, (state, { payload }) => {
+//                 state.name = payload.name;
+//                 state.email = payload.email;
+//                 state.id = payload.id;
+//                 // state.avatar = action.payload.url;
+//                 state.isLoggedIn = true;
+//                 state.isAuthLoading = false;
+//                 state.authError = null;
+//             })
+//             .addCase(login.rejected, handleRejected)
 
             // .addCase(logout.pending, (state) => {
             //     state.isAuthLoading = 'logout';
@@ -84,8 +99,4 @@ export const authSlice = createSlice({
             //     state.isRefreshing = false;
             //     state.isAuthLoading = false;
             // })
-    },
-})
-
-export const authReducer = authSlice.reducer;
-export const { updateUserProfile } = authSlice.actions;
+    // },
