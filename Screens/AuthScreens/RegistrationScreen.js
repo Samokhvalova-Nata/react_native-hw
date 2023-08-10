@@ -59,18 +59,17 @@ export default function RegisterScreen() {
 
   const handleRegisterSubmit = async (name, email, password) => {
     if (name && email && password) {
-      dispatch(register( name, email, password))
-        .then((data) => {
-        if (!data || !data.uid) {
+      dispatch(register( name, email, password)).then((data) => {
+        if (!data) {
           Toast.show({
             type: "error",
             text1: "Oooops! You have not been registred",
           });
           return;
-        }
-        dispatch(authStateChange({ stateChange: true }));
-        // console.log('data', data);
-
+          }
+          // console.log('data', data);
+        // dispatch(authStateChange({ stateChange: true }));
+        
         setName('');
         setEmail('');
         setPassword('');
@@ -79,8 +78,6 @@ export default function RegisterScreen() {
           text1: "Congrats! You have been registred",
         });
       });
-      
-      // navigation.navigate("Login");
       return;
     }
 

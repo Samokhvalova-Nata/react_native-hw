@@ -9,12 +9,18 @@ import { Camera } from "expo-camera";
 import * as Location from "expo-location";
 import * as MediaLibrary from "expo-media-library";
 import { useNavigation } from "@react-navigation/native";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addPost } from "../../redux/post/postSlice";
+import { db, storage } from "../../firebase/config";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { Toast } from "react-native-toast-message/lib/src/Toast";
+import { getUserId, getUserName } from "../../redux/auth/authSelectors";
 
 
 export default function CreatePostsScreen() {
     const dispatch = useDispatch();
+    const name = useSelector(getUserName);
+    const userId = useSelector(getUserId);
     const navigation = useNavigation();
 
     const [photo, setPhoto] = useState('');
@@ -59,11 +65,61 @@ export default function CreatePostsScreen() {
             return <Text>No access to camera</Text>;
         }
 
+    const uploadPhotoToServer = async (photo) => {
+        const uniqPostId = Date.now().toString();
+        try {
+            const response = await fetch(photo);
+            const file = await response.blob();
+            const imageRef = ref(storage, `postImage/${uniqPostId}`);
+            await uploadBytes(imageRef, file);
+
+            // отримуємо посилання на зроблене фото
+            const processedPhoto = await getDownloadURL(imageRef);
+            console.log('prossedPhoto', processedPhoto);
+
+            return processedPhoto;
+        } catch (error) {
+            console.log('error', error.message)
+            Toast.show({
+                type: "error",
+                text1: "Sending photo to server was rejected",
+            });
+        }
+        // console.log('data', data)
+    };
+    
+    // const uploadPhotoToServer = async () => {
+    //     const response = await fetch(photo);
+    //     const file = await response.blob();
+    
+    //     const uniquePostId = Date.now().toString();
+    
+    //     await db.storage().ref(`postImage/${uniquePostId}`).put(file);
+    
+    //     const processedPhoto = await db
+    //         .storage()
+    //         .ref("postImage")
+    //         .child(uniquePostId)
+    //         .getDownloadURL();
+    
+    //     return processedPhoto;
+    // };
+    
+    // const uploadPostToServer = async () => {
+    //     const photo = await uploadPhotoToServer();
+    //     const createPost = await db
+    //         .firestore()
+    //         .collection("posts")
+    //         .add({ photo, title, photoLocation, geoLocation: coords, owner: { userId, name } });
+    //     };
+
     const makePhoto = async () => {
         if (cameraRef) {
             const { uri } = await cameraRef.takePictureAsync();
             setPhoto(uri);
+            uploadPhotoToServer(uri);
         }
+        
     };
 
     const removePost = () => {
@@ -76,6 +132,7 @@ export default function CreatePostsScreen() {
         setGeoLocation((geoLocation) => ({
             ...geoLocation
         }));
+        uploadPostToServer();
         navigation.navigate("PostsScreen");
         dispatch(addPost( title, photoLocation, photo, geoLocation));
         removePost();

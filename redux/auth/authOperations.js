@@ -1,11 +1,8 @@
-// import { createAsyncThunk } from "@reduxjs/toolkit";
-// import { db } from "../../firebase/config";
 import { auth } from "../../firebase/config";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut, updateProfile } from "firebase/auth";
 import { authLogOut, authStateChange, updateUserProfile } from "./authSlice";
 
 // --------------------REGISTRATION-----------------------------------
-
 export const register = (name, email, password) =>
     async (dispatch) => {
         try {
@@ -15,21 +12,10 @@ export const register = (name, email, password) =>
 
             await updateProfile(user, {
                 displayName: name,
-                // photoUrl: ActivityIndicatorBase,
             });
 
-            const { uid,
-                displayName,
-                email: emailBase,
-                // avatar: photoUrlBase
-            } = await auth.currentUser;
-
-            const userUpdateData = {
-                userId: uid,
-                name: displayName,
-                email: emailBase,
-                // avatar: photoUrlBase,
-            };
+            const { uid, displayName, email } = await auth.currentUser;
+            const userUpdateData = { userId: uid, name: displayName, email };
 
             dispatch(updateUserProfile(userUpdateData));
             return user;
@@ -40,75 +26,38 @@ export const register = (name, email, password) =>
 };
 
 // -----------------LOGIN--------------------------------------------
-
 export const login = (email, password) =>
     async () => {
         try {
-            const { user } = await signInWithEmailAndPassword(auth, email, password);
-            return user;
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+            // console.log('userCredential', userCredential);
+
+            return userCredential;
         } catch (e) {
             console.log('e.message', e.message)
             return e.message;
         }
     };
 
+// ---------------SET AUTH STATE---------------
+export const authStateChangeUser = () => async (dispatch) => {
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const userUpdateData = {
+                userId: user.uid,
+                name: user.displayName,
+                email: user.email,
+            };
 
-// ----------------LOGOUT--------------------------------------
-// POST @/users/logout
-// headers: Authorization: Bearer token
-export const logout = () => async (dispatch) => {
-
-    dispatch(authStateChange({ stateChange: false }));
-    dispatch(authLogOut());
+            dispatch(authStateChange({ stateChange: true }));
+            dispatch(updateUserProfile(userUpdateData));
+        }
+    })
 };
 
-
-// --------------------REGISTRATION-----------------------------------
-// POST @/users/signup
-// body: { name, email, password }
-// export const register = createAsyncThunk(
-//     'auth/register',
-//     async ({ name, email, password }, thunkAPI) => {
-//         try {
-//             const { user } = await createUserWithEmailAndPassword(auth, email, password);
-//             const id = user.uid;
-//             return { name, email, id };
-//         } catch (e) {
-//             return thunkAPI.rejectWithValue(e.message);
-//         }
-//     }
-// );
-
-// -----------------LOGIN--------------------------------------------
-// POST @/users/login
-// body: { name, email }
-// export const login = createAsyncThunk(
-//     'auth/login',
-//     async ({ email, password }, thunkAPI) => {
-//         try {
-//             const { user } = await signInWithEmailAndPassword(auth, email, password);
-//             const id = user.uid;
-
-//             return { email, id };
-//         } catch (e) {
-//             console.log('e.message', e.message)
-//             return thunkAPI.rejectWithValue(e.message);
-//         }
-//     }
-// );
-
 // ----------------LOGOUT--------------------------------------
-// POST @/users/logout
-// headers: Authorization: Bearer token
-// export const logout = createAsyncThunk(
-//     'auth/logout',
-//     async (_, thunkAPI) => {
-//         try {
-//             // await axios.post("/users/logout");
-//             // clearAuthHeader();
-//         } catch (e) {
-//             console.log('e.message', e.message)
-//             return thunkAPI.rejectWithValue(e.message);
-//         }
-//     }
-// );
+export const logout = () => async (dispatch) => {
+    await signOut(auth);
+    dispatch(authLogOut());
+};

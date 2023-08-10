@@ -1,16 +1,18 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { StyleSheet, View } from 'react-native';
 import { useNavigation } from "@react-navigation/native";
+import { useDispatch } from "react-redux";
 import { Feather } from '@expo/vector-icons';
 import { COLORS } from "./../common/vars";
+import { logout } from "../redux/auth/authOperations";
 import PostsScreen from "././Tabs/PostsScreen";
 import CreatePostsScreen from "././Tabs/CreatePostsScreen";
 import ProfileScreen from "././Tabs/ProfileScreen";
 
-
 const Tabs = createBottomTabNavigator();
 
 export default function HomeScreen() {
+    const dispatch = useDispatch();
     const navigation = useNavigation();
 
     return (
@@ -53,7 +55,7 @@ export default function HomeScreen() {
                     title: "Публікації",
                     headerRight: () => (
                         <Feather name="log-out" size={24} color={COLORS.secondaryText} style={{ marginRight: 10 }}
-                        onPress={() => navigation.navigate("Login")}/>
+                        onPress={() => dispatch(logout())}/>
                     )
                 }} />
             <Tabs.Screen name="CreatePostsScreen" component={CreatePostsScreen}

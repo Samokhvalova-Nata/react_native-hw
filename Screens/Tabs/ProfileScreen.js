@@ -1,5 +1,5 @@
 import React from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import { Dimensions, StyleSheet, Text, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
@@ -7,6 +7,7 @@ import { Feather } from "@expo/vector-icons";
 import { COLORS } from "../../common/vars";
 import { getPosts } from "../../redux/post/postSelectors";
 import { getUserName } from "../../redux/auth/authSelectors";
+import { logout } from "../../redux/auth/authOperations";
 import Background from "../../Components/Background/Background";
 import PostProfileItem from "../../Components/Posts/PostProfileItem";
 import Avatar from "../../Components/Avatar/Avatar";
@@ -17,6 +18,7 @@ export default function ProfileScreen() {
     const navigation = useNavigation();
     const posts = useSelector(getPosts);
     const name = useSelector(getUserName);
+    const dispatch = useDispatch();
 
     return (
         <>
@@ -29,7 +31,7 @@ export default function ProfileScreen() {
                         style={{ position: 'absolute',
                                 top: 22,
                                 right: 16 }}
-                        onPress={() => navigation.navigate("Login")} />
+                        onPress={() => dispatch(logout())} />
                     <Avatar/>
                     <Text style={styles.title}>{name}</Text>
 

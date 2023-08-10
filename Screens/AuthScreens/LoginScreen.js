@@ -8,6 +8,7 @@ import AuthLinkButton from "../../Components/Buttons/AuthLinkButton";
 import { useDispatch } from "react-redux";
 import { login } from "../../redux/auth/authOperations";
 import Toast from "react-native-toast-message";
+import { authStateChange } from "../../redux/auth/authSlice";
 
 export default function LoginScreen() {
     const dispatch = useDispatch();
@@ -46,15 +47,24 @@ export default function LoginScreen() {
 
     const handleLoginSubmit = () => {
         if (email && password) {
-            dispatch(login({ email, password }));
-            setEmail('');
-            setPassword('');
-            Toast.show({
-                type: "success",
-                text1: `Welcome, ${email} `,
-            });
-            navigation.navigate("Home");
-            return;
+            dispatch(login(email, password)).then((data) => {
+                if (!data) {
+                    Toast.show({
+                        type: "error",
+                        text1: "Oooops! You have not been signin",
+                    });
+                    return;
+                }
+                // console.log('data', data);
+                dispatch(authStateChange({ stateChange: true }));
+                setEmail('');
+                setPassword('');
+                Toast.show({
+                    type: "success",
+                    text1: `Welcome, ${email} `,
+                });
+        });
+        return;
         };
 
         Toast.show({
@@ -62,6 +72,8 @@ export default function LoginScreen() {
             text1: "You have to fill out all fields",
         });
     };
+
+
 
     return (
         <>
@@ -78,7 +90,7 @@ export default function LoginScreen() {
                             placeholder="Адреса електронної пошти"
                             value={email}
                             textContentType="emailAddress"
-                            autoCompleteType="off"
+                            autoCompleteType="email"
                             onBlur={handleBlur}
                             onFocus={() => handleFocus("emailAddress")}
                             onChangeText={setEmail}
