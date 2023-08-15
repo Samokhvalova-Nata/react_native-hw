@@ -1,20 +1,29 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, Image, ScrollView, Dimensions, FlatList } from 'react-native';
 import { COLORS } from "../../common/vars";
 import { useSelector } from "react-redux";
-import { getPosts } from "../../redux/post/postSelectors";
+import { db } from "../../firebase/config";
+import { collection, onSnapshot } from "firebase/firestore";
+// import { getPosts } from "../../redux/post/postSelectors";
 import { getUserEmail, getUserName } from "../../redux/auth/authSelectors";
 import PostItem from "../../Components/Posts/PostItem";
 
 
 export default function PostsScreen() {
-    const posts = useSelector(getPosts);
+    // const posts = useSelector(getPosts);
     const name = useSelector(getUserName);
     const email = useSelector(getUserEmail);
+    const [serverPosts, setServerPosts] = useState([]);
     // const avatar = useSelector(getUserAvatar);
 
-    // console.log('posts', posts)
-    
+    useEffect(() => {
+        const dbRef = collection(db, "posts");
+        onSnapshot(dbRef, (data) => {
+            const dbPosts = data.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            setServerPosts(dbPosts);
+        })
+    }, []);
+
     return (
         <ScrollView>
             <View style={styles.container}>
@@ -27,10 +36,11 @@ export default function PostsScreen() {
                     <Text style={styles.userEmail}>{email}</Text>
                 </View>
             </View>
-            {(posts.length !== 0) && 
-                posts.map(({ id, title, photoLocation, photo, geoLocation }) => (
+            {(serverPosts.length !== 0) && 
+                serverPosts.map(({ id, title, photoLocation, photo, geoLocation }) => (
                     <PostItem
                         key={id}
+                        id={id}
                         title={title}
                         photoLocation={photoLocation}
                         url={photo}

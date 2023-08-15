@@ -30,7 +30,7 @@ export default function PostItem({ id, title, comments = 0, photoLocation, url, 
       <View style={styles.postDetails}>
         <TouchableOpacity
           style={styles.postComments}
-          onPress={() => navigation.navigate("Comments")}
+          onPress={() => navigation.navigate("Comments", { url, id })}
         >
           <Feather name="message-circle" size={24} style={styles.postIcon} />
           <Text style={styles.commentText}>{comments}</Text>
@@ -38,7 +38,8 @@ export default function PostItem({ id, title, comments = 0, photoLocation, url, 
         <TouchableOpacity
           style={styles.postLocation}
           onPress={() =>
-            navigation.navigate("Map", { geoLocation, photoLocation })}
+            navigation.navigate("Map", { geoLocation, photoLocation })
+          }
         >
           <Feather name="map-pin" size={24} style={styles.postIcon} />
           <Text style={styles.locationText}>{photoLocation}</Text>

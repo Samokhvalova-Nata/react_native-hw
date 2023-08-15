@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import { deletePost } from "../../redux/post/postSlice";
 
 
-export default function PostProfileItem({id, title, comments=0, likes=0, photoLocation, url }) {
+export default function PostProfileItem({id, title, comments=0, likes=0, photoLocation, url, geoLocation }) {
   const navigation = useNavigation();
   const dispatch = useDispatch();
 
@@ -33,7 +33,7 @@ export default function PostProfileItem({id, title, comments=0, likes=0, photoLo
             name={comments === 0 ? "comment-o" : "comment"}
             size={24}
             color={comments === 0 ? COLORS.secondaryText : COLORS.accent}
-            onPress={() => navigation.navigate("Comments")}
+            onPress={() => navigation.navigate("Comments", { url, id })}
           />
           <Text style={styles.commentText}>{comments}</Text>
         </View>
@@ -50,7 +50,9 @@ export default function PostProfileItem({id, title, comments=0, likes=0, photoLo
           <Feather name="map-pin" size={24} color={COLORS.secondaryText} />
           <Text
             style={styles.locationText}
-            onPress={() => navigation.navigate("Map")}
+            onPress={() =>
+              navigation.navigate("Map", { geoLocation, photoLocation })
+            }
           >
             {photoLocation}
           </Text>

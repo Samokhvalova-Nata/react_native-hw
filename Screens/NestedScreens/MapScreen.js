@@ -5,7 +5,7 @@ import MapView, { Marker } from "react-native-maps";
 export default function MapScreen({ route }) {
     const latitude = route.params.geoLocation?.latitude ?? 50.45033004843756;
     const longitude = route.params.geoLocation?.longitude ?? 30.523874329583546;
-    console.log('route.params', route.params)
+    // console.log('route.params', route.params)
 
     return (
         <View style={styles.container}>
@@ -25,7 +25,6 @@ export default function MapScreen({ route }) {
                     <Marker
                         title={route.params?.photoLocation ?? "Я тут"}
                         coordinate={{ latitude: latitude, longitude: longitude }}
-                        description=""
                     />
                 )}
             </MapView>

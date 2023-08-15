@@ -12,6 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import { addPost } from "../../redux/post/postSlice";
 import { db, storage } from "../../firebase/config";
+import { collection, addDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { Toast } from "react-native-toast-message/lib/src/Toast";
 import { getUserId, getUserName } from "../../redux/auth/authSelectors";
@@ -65,7 +66,46 @@ export default function CreatePostsScreen() {
             return <Text>No access to camera</Text>;
         }
 
-    const uploadPhotoToServer = async (photo) => {
+    const makePhoto = async () => {
+        if (cameraRef) {
+            const { uri } = await cameraRef.takePictureAsync();
+            setPhoto(uri);
+            console.log('photo uri', uri)
+        }
+    };
+
+    const removePost = () => {
+        setPhoto('');
+        setTitle('');
+        setPhotoLocation('');
+    };
+
+    const uploadPostToServer = async () => {
+        try {
+            const photo = await uploadPhotoToServer();
+            const docRef = await addDoc(collection(db, "posts"), {
+                photo,
+                title,
+                photoLocation,
+                geoLocation,
+                owner: { userId, name }
+            });
+            console.log('Document written with ID: ', docRef.id);
+            dispatch(addPost(title, photoLocation, photo, geoLocation));
+            Toast.show({
+                type: "success",
+                text1: "Збережено",
+            });
+        } catch (e) {
+            console.error("Error adding document: ", e);
+            throw e;
+        } finally {
+            removePost();
+            navigation.navigate("PostsScreen");
+        }
+        };
+
+    const uploadPhotoToServer = async () => {
         const uniqPostId = Date.now().toString();
         try {
             const response = await fetch(photo);
@@ -75,8 +115,7 @@ export default function CreatePostsScreen() {
 
             // отримуємо посилання на зроблене фото
             const processedPhoto = await getDownloadURL(imageRef);
-            console.log('prossedPhoto', processedPhoto);
-
+            // console.log('prossedPhoto', processedPhoto);
             return processedPhoto;
         } catch (error) {
             console.log('error', error.message)
@@ -85,58 +124,7 @@ export default function CreatePostsScreen() {
                 text1: "Sending photo to server was rejected",
             });
         }
-        // console.log('data', data)
-    };
-    
-    // const uploadPhotoToServer = async () => {
-    //     const response = await fetch(photo);
-    //     const file = await response.blob();
-    
-    //     const uniquePostId = Date.now().toString();
-    
-    //     await db.storage().ref(`postImage/${uniquePostId}`).put(file);
-    
-    //     const processedPhoto = await db
-    //         .storage()
-    //         .ref("postImage")
-    //         .child(uniquePostId)
-    //         .getDownloadURL();
-    
-    //     return processedPhoto;
-    // };
-    
-    // const uploadPostToServer = async () => {
-    //     const photo = await uploadPhotoToServer();
-    //     const createPost = await db
-    //         .firestore()
-    //         .collection("posts")
-    //         .add({ photo, title, photoLocation, geoLocation: coords, owner: { userId, name } });
-    //     };
-
-    const makePhoto = async () => {
-        if (cameraRef) {
-            const { uri } = await cameraRef.takePictureAsync();
-            setPhoto(uri);
-            uploadPhotoToServer(uri);
-        }
-        
-    };
-
-    const removePost = () => {
-        setPhoto('');
-        setTitle('');
-        setPhotoLocation('');
-    };
-
-    const sendPost = () => {
-        setGeoLocation((geoLocation) => ({
-            ...geoLocation
-        }));
-        uploadPostToServer();
-        navigation.navigate("PostsScreen");
-        dispatch(addPost( title, photoLocation, photo, geoLocation));
-        removePost();
-    };
+    };    
 
     return (
         <ScrollView>
@@ -207,11 +195,12 @@ export default function CreatePostsScreen() {
                     </KeyboardAvoidingView>
                     <TouchableOpacity
                         activeOpacity={0.8}
+                        disabled={ (photo && title && photoLocation) ? false : true }
                         style={{
                             ...styles.btn,
                             backgroundColor: photo && title && photoLocation ? COLORS.accent : COLORS.secondaryBcg,
                         }}
-                        onPress={sendPost}>
+                        onPress={uploadPostToServer}>
                         <Text title="Login" style={{
                             ...styles.btnTitle,
                             color: photo && title && photoLocation ? COLORS.mainBcg : COLORS.secondaryText,

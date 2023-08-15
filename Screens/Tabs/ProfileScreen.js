@@ -1,24 +1,35 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import { Dimensions, StyleSheet, Text, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { Feather } from "@expo/vector-icons";
 import { COLORS } from "../../common/vars";
-import { getPosts } from "../../redux/post/postSelectors";
+// import { getPosts } from "../../redux/post/postSelectors";
 import { getUserName } from "../../redux/auth/authSelectors";
 import { logout } from "../../redux/auth/authOperations";
 import Background from "../../Components/Background/Background";
 import PostProfileItem from "../../Components/Posts/PostProfileItem";
 import Avatar from "../../Components/Avatar/Avatar";
 import MainButton from "../../Components/Buttons/MainButton";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "../../firebase/config";
 
 
 export default function ProfileScreen() {
     const navigation = useNavigation();
-    const posts = useSelector(getPosts);
+    // const posts = useSelector(getPosts);
     const name = useSelector(getUserName);
     const dispatch = useDispatch();
+    const [serverPosts, setServerPosts] = useState([]);
+
+    useEffect(() => {
+        const dbRef = collection(db, "posts");
+        onSnapshot(dbRef, (data) => {
+            const dbPosts = data.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            setServerPosts(dbPosts);
+        })
+    }, []);
 
     return (
         <>
@@ -35,16 +46,17 @@ export default function ProfileScreen() {
                     <Avatar/>
                     <Text style={styles.title}>{name}</Text>
 
-                    {(posts.length !== 0)
+                    {(serverPosts.length !== 0)
                         ? 
-                        (posts.map(({ id, title, comments, location, photo, likes }) => (
+                        (serverPosts.map(({ id, title, photoLocation, photo, geoLocation, comments, likes }) => (
                             <PostProfileItem
                                 key={id}
                                 title={title}
+                                photoLocation={photoLocation}
+                                url={photo}
+                                geoLocation={geoLocation}
                                 comments={comments}
                                 likes={likes}
-                                location={location}
-                                url={photo}
                             />)))
                         : (
                             <View style={{ flex: 1, marginTop: 30, paddingHorizontal: 16 }}>
