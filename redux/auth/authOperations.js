@@ -1,9 +1,9 @@
 import { auth } from "../../firebase/config";
 import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut, updateProfile } from "firebase/auth";
-import { authLogOut, authStateChange, updateUserProfile } from "./authSlice";
+import { authLogOut, authStateChange, updateAvatar, updateUserProfile } from "./authSlice";
 
 // --------------------REGISTRATION-----------------------------------
-export const register = (name, email, password) =>
+export const register = (name, email, password, photo) =>
     async (dispatch) => {
         try {
             await createUserWithEmailAndPassword(auth, email, password);
@@ -12,12 +12,25 @@ export const register = (name, email, password) =>
 
             await updateProfile(user, {
                 displayName: name,
+                photoURL: photo,
             });
 
-            const { uid, displayName, email } = await auth.currentUser;
-            const userUpdateData = { userId: uid, name: displayName, email };
+            const {
+                uid,
+                displayName,
+                email: emailBase,
+                photoURL,
+            } = await auth.currentUser;
+
+            const userUpdateData = {
+                userId: uid,
+                name: displayName,
+                email: emailBase,
+                avatar: photoURL,
+            };
 
             dispatch(updateUserProfile(userUpdateData));
+            // console.log('user', user)
             return user;
         } catch (e) {
             console.log("e.message", e.message);
@@ -31,7 +44,7 @@ export const login = (email, password) =>
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
-            // console.log('userCredential', userCredential);
+            console.log('userCredential', userCredential);
 
             return userCredential;
         } catch (e) {
@@ -48,6 +61,7 @@ export const authStateChangeUser = () => async (dispatch) => {
                 userId: user.uid,
                 name: user.displayName,
                 email: user.email,
+                avatar: user.photoURL,
             };
 
             dispatch(authStateChange({ stateChange: true }));
@@ -60,4 +74,34 @@ export const authStateChangeUser = () => async (dispatch) => {
 export const logout = () => async (dispatch) => {
     await signOut(auth);
     dispatch(authLogOut());
+};
+
+// ---------------UPDATE AVATAR-----------------------
+export const updateUserAvatar = (newServerAvatar) => async (dispatch) => {
+    try {
+        const user = auth.currentUser;
+
+        await updateProfile(user, {
+                photoURL: newServerAvatar,
+            });
+
+            const {
+                uid,
+                displayName,
+                email: emailBase,
+                photoURL,
+            } = await auth.currentUser;
+
+            const userUpdateData = {
+                userId: uid,
+                name: displayName,
+                email: emailBase,
+                avatar: photoURL,
+            };
+
+        dispatch(updateUserProfile(userUpdateData));
+        return user;
+    } catch (error) {
+        console.log("updateUserAvatar: ", error.message);
+    }
 };

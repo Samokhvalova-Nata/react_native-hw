@@ -3,7 +3,7 @@ import { Feather, FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { COLORS } from "../../common/vars";
 import { useDispatch } from "react-redux";
-import { deletePost } from "../../redux/post/postSlice";
+import { deletePost } from "../../redux/post/postOperations";
 
 
 export default function PostProfileItem({id, title, comments=0, likes=0, photoLocation, url, geoLocation }) {
@@ -28,21 +28,21 @@ export default function PostProfileItem({id, title, comments=0, likes=0, photoLo
       </View>
       <Text style={styles.postTitle}>{title}</Text>
       <View style={styles.postDetails}>
-        <View style={styles.postData}>
+        <TouchableOpacity
+          style={styles.postData}
+          onPress={() => navigation.navigate("Comments", { url, id })}>
           <FontAwesome
             name={comments === 0 ? "comment-o" : "comment"}
             size={24}
             color={comments === 0 ? COLORS.secondaryText : COLORS.accent}
-            onPress={() => navigation.navigate("Comments", { url, id })}
           />
           <Text style={styles.commentText}>{comments}</Text>
-        </View>
+        </TouchableOpacity>
         <View style={{ ...styles.postData, marginLeft: 24 }}>
           <Feather
             name="thumbs-up"
             size={24}
             color={likes === 0 ? COLORS.secondaryText : COLORS.accent}
-            onPress={() => navigation.navigate("Comments")}
           />
           <Text style={styles.commentText}>{likes}</Text>
         </View>

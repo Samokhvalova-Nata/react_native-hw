@@ -31,33 +31,33 @@ import { createSlice, nanoid } from "@reduxjs/toolkit";
 const initialState = {
     comment: "",
     like: 0,
-    postsList: [],
+    // postsList: [],
 };
 
 export const postSlice = createSlice({
     name: "posts",
     initialState,
     reducers: {
-        addPost: {
-            reducer(state, action) {
-                state.postsList.push(action.payload);
-            },
-            prepare(title, photoLocation, photo, geoLocation) {
-                return {
-                    payload: {
-                        id: nanoid(),
-                        title,
-                        photoLocation,
-                        photo,
-                        geoLocation
-                    },
-                };
-            },
-        },
-        deletePost(state, action) {
-            const index = state.postsList.findIndex(post => post.id === action.payload);
-            state.postsList.splice(index, 1);
-        },
+        // addPost: {
+        //     reducer(state, action) {
+        //         state.postsList.push(action.payload);
+        //     },
+        //     prepare(title, photoLocation, photo, geoLocation) {
+        //         return {
+        //             payload: {
+        //                 id: nanoid(),
+        //                 title,
+        //                 photoLocation,
+        //                 photo,
+        //                 geoLocation
+        //             },
+        //         };
+        //     },
+        // },
+        // deletePost(state, action) {
+        //     const index = state.postsList.findIndex(post => post.id === action.payload);
+        //     state.postsList.splice(index, 1);
+        // },
         addComment:  (state, { payload }) => ({
             ...state,
             comment: payload,
@@ -67,7 +67,7 @@ export const postSlice = createSlice({
 
 export const postReducer = postSlice.reducer;
 export const {
-    addPost,
-    deletePost,
+    // addPost,
+    // deletePost,
     addComment,
 } = postSlice.actions;

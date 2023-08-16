@@ -62,7 +62,6 @@ export default function CreatePostsScreen() {
             return <View />;
         }
         if (hasPermission === false) {
-            // TODO style to text
             return <Text>No access to camera</Text>;
         }
 
@@ -70,7 +69,6 @@ export default function CreatePostsScreen() {
         if (cameraRef) {
             const { uri } = await cameraRef.takePictureAsync();
             setPhoto(uri);
-            console.log('photo uri', uri)
         }
     };
 
@@ -103,7 +101,7 @@ export default function CreatePostsScreen() {
             removePost();
             navigation.navigate("PostsScreen");
         }
-        };
+    };
 
     const uploadPhotoToServer = async () => {
         const uniqPostId = Date.now().toString();
@@ -113,9 +111,7 @@ export default function CreatePostsScreen() {
             const imageRef = ref(storage, `postImage/${uniqPostId}`);
             await uploadBytes(imageRef, file);
 
-            // отримуємо посилання на зроблене фото
             const processedPhoto = await getDownloadURL(imageRef);
-            // console.log('prossedPhoto', processedPhoto);
             return processedPhoto;
         } catch (error) {
             console.log('error', error.message)
@@ -139,7 +135,7 @@ export default function CreatePostsScreen() {
                         </TouchableOpacity>
                     </ImageBackground>
                     ) : (
-                            <Camera style={styles.postPhotoWrap} 
+                    <Camera style={styles.postPhotoWrap} 
                             type={type}
                             ref={setCameraRef}>
                         <MaterialCommunityIcons name="camera-flip" size={22} color={COLORS.secondaryText}

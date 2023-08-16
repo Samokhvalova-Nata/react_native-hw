@@ -8,17 +8,24 @@ import {
   View,
   TextInput,
   TouchableOpacity,
-  Text
+  Text,
+  Image,
 } from "react-native";
+import { AntDesign } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../../common/vars";
 import Background from "../../Components/Background/Background";  
-import Avatar from "../../Components/Avatar/Avatar";
 import MainButton from "../../Components/Buttons/MainButton";
 import AuthLinkButton from "../../Components/Buttons/AuthLinkButton";
 import Toast from "react-native-toast-message";
 import { register } from "../../redux/auth/authOperations";
 import { useDispatch } from "react-redux";
-import { authStateChange } from "../../redux/auth/authSlice";
+import { Camera } from "expo-camera";
+import * as MediaLibrary from "expo-media-library";
+import { storage } from "../../firebase/config";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+
 
 export default function RegisterScreen() {
   const dispatch = useDispatch();
@@ -31,6 +38,12 @@ export default function RegisterScreen() {
   const [isShownPsw, setIsShownPsw] = useState(false);
   const [keyboardStatus, setKeyboardStatus] = useState(false);
   const navigation = useNavigation();
+
+  const [avatar, setAvatar] = useState("");
+  const [hasPermission, setHasPermission] = useState(null);
+  const [cameraRef, setCameraRef] = useState(null);
+  const [type, setType] = useState(Camera.Constants.Type.back);
+  const [openCamera, setOpenCamera] = useState(false);
 
   useEffect(() => {
     const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
@@ -57,25 +70,71 @@ export default function RegisterScreen() {
     setIsShownPsw(!isShownPsw);
   };
 
-  const handleRegisterSubmit = async (name, email, password) => {
-    if (name && email && password) {
-      dispatch(register( name, email, password)).then((data) => {
-        if (!data) {
+  useEffect(() => {
+        (async () => {
+          const { status } = await Camera.requestCameraPermissionsAsync();
+          await MediaLibrary.requestPermissionsAsync();
+          setHasPermission(status === "granted");
+        })();
+  }, []);
+
+  if (hasPermission === null) {
+        return <View />;
+  }
+  if (hasPermission === false) {
+        return <Text>No access to camera</Text>;
+  }
+
+  const makePhoto = async () => {
+    if (cameraRef) {
+          const { uri } = await cameraRef.takePictureAsync();
+          setAvatar(uri);
+          setOpenCamera(false);
+        }
+  };
+
+  const uploadPhotoToServer = async () => {
+        const uniqPostId = Date.now().toString();
+        try {
+          const response = await fetch(avatar);
+          const file = await response.blob();
+          const imageRef = ref(storage, `avatarImage/${uniqPostId}`);
+          await uploadBytes(imageRef, file);
+
+          const processedPhoto = await getDownloadURL(imageRef);
+          return processedPhoto;
+        } catch (error) {
+          console.log("error", error.message);
           Toast.show({
             type: "error",
-            text1: "Oooops! You have not been registred",
+            text1: "Sending photo to server was rejected",
+          });
+        }
+      };
+
+  const handleRegisterSubmit = async (name, email, password) => {
+    if (name && email && password) {
+
+      const photo = avatar
+        ? await uploadPhotoToServer()
+        : "https://firebasestorage.googleapis.com/v0/b/rn-social-ed3b9.appspot.com/o/avatarImage%2Fdefault-avatar.jpg?alt=media&token=9f59ab3a-1d85-45ae-bff5-ec6e028128b1";
+
+      dispatch(register(name, email, password, photo)).then((data) => {
+        if (data === undefined || !data.uid) {
+          Toast.show({
+            type: "error",
+            text1: "Упс! Реєстрація не виконана",
           });
           return;
-          }
-          // console.log('data', data);
-        // dispatch(authStateChange({ stateChange: true }));
-        
-        setName('');
-        setEmail('');
-        setPassword('');
+        }
+        // console.log('data', data);
+
+        setName("");
+        setEmail("");
+        setPassword("");
         Toast.show({
           type: "success",
-          text1: "Congrats! You have been registred",
+          text1: "Реєстрація виконана успішно",
         });
       });
       return;
@@ -96,7 +155,74 @@ export default function RegisterScreen() {
           behavior={Platform.OS == "ios" ? "padding" : "height"}
         >
           <View style={styles.form}>
-            <Avatar />
+            <View style={styles.avatarWrap}>
+              {openCamera ? (
+                <Camera
+                  style={styles.avatar}
+                  type={type}
+                  ref={setCameraRef}
+                  ratio="1:1"
+                >
+                  <TouchableOpacity
+                    style={{ ...styles.cameraBtn }}
+                    onPress={() => {
+                      setType(
+                        type === Camera.Constants.Type.front
+                          ? Camera.Constants.Type.back
+                          : Camera.Constants.Type.front
+                      );
+                    }}
+                  >
+                    <MaterialCommunityIcons
+                      name="camera-flip"
+                      size={22}
+                      color={COLORS.secondaryText}
+                    />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={{ ...styles.cameraBtnPos, ...styles.cameraBtn }}
+                    onPress={makePhoto}
+                  >
+                    <Ionicons
+                      name="ios-camera"
+                      size={24}
+                      color={COLORS.secondaryText}
+                    />
+                  </TouchableOpacity>
+                </Camera>
+              ) : (
+                <Image
+                  source={{ uri: avatar ? avatar : null }}
+                  style={styles.avatar}
+                  alt="User photo"
+                />
+              )}
+
+              <TouchableOpacity style={styles.btnAdd}>
+                {!avatar ? (
+                  <AntDesign
+                    name="pluscircleo"
+                    size={25}
+                    color={COLORS.accent}
+                    onPress={() => {
+                      setAvatar(null);
+                      setOpenCamera(true);
+                    }}
+                  />
+                ) : (
+                  <AntDesign
+                    name="closecircleo"
+                    size={25}
+                    color={COLORS.secondaryText}
+                    onPress={() => {
+                      setOpenCamera(true);
+                    }}
+                  />
+                )}
+              </TouchableOpacity>
+            </View>
+
             <Text style={styles.formTitle}>Реєстрація</Text>
             <TextInput
               style={[
@@ -133,7 +259,7 @@ export default function RegisterScreen() {
               autoCompleteType="off"
               onBlur={handleBlur}
               onFocus={() => handleFocus("emailAddress")}
-              onChangeText={(value)=>setEmail(value)}
+              onChangeText={(value) => setEmail(value)}
             />
 
             <View style={(position = "relative")}>
@@ -191,6 +317,44 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "flex-end",
+  },
+  avatarWrap: {
+    position: "absolute",
+    top: -60,
+    left: "50%",
+    transform: [{ translateX: -50 }],
+    width: 120,
+    height: 120,
+    backgroundColor: COLORS.secondaryBcg,
+    borderRadius: 16,
+  },
+  avatar: {
+    width: 120,
+    height: 120,
+    borderRadius: 16,
+  },
+  cameraBtnPos: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+  },
+  cameraBtn: {
+    width: 35,
+    height: 35,
+    backgroundColor: COLORS.mainBcg,
+    opacity: 0.8,
+    borderRadius: 35,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  btnAdd: {
+    position: "absolute",
+    top: 75,
+    right: -12,
+    width: 25,
+    height: 25,
+    backgroundColor: COLORS.mainBcg,
+    borderRadius: 50,
   },
   form: {
     position: "relative",

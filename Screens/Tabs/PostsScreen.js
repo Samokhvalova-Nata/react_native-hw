@@ -4,17 +4,15 @@ import { COLORS } from "../../common/vars";
 import { useSelector } from "react-redux";
 import { db } from "../../firebase/config";
 import { collection, onSnapshot } from "firebase/firestore";
-// import { getPosts } from "../../redux/post/postSelectors";
-import { getUserEmail, getUserName } from "../../redux/auth/authSelectors";
+import { getUserAvatar, getUserEmail, getUserName } from "../../redux/auth/authSelectors";
 import PostItem from "../../Components/Posts/PostItem";
 
 
 export default function PostsScreen() {
-    // const posts = useSelector(getPosts);
     const name = useSelector(getUserName);
     const email = useSelector(getUserEmail);
+    const avatar = useSelector(getUserAvatar);
     const [serverPosts, setServerPosts] = useState([]);
-    // const avatar = useSelector(getUserAvatar);
 
     useEffect(() => {
         const dbRef = collection(db, "posts");
@@ -28,8 +26,8 @@ export default function PostsScreen() {
         <ScrollView>
             <View style={styles.container}>
             <View style={styles.userInfo}>
-                <Image style={styles.avatar}
-                    source={require("../../assets/images/avatar.jpg")}
+                    <Image style={styles.avatar}
+                        source={{uri: avatar}}
                     alt="User photo" />
                 <View style={styles.userData}>
                     <Text style={styles.userName}>{name}</Text>

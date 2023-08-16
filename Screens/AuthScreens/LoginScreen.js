@@ -48,20 +48,20 @@ export default function LoginScreen() {
     const handleLoginSubmit = () => {
         if (email && password) {
             dispatch(login(email, password)).then((data) => {
-                if (!data) {
+                if (data === undefined || !data.user) {
                     Toast.show({
                         type: "error",
-                        text1: "Oooops! You have not been signin",
+                        text1: "Упс! Вхід не виконано",
                     });
                     return;
                 }
-                // console.log('data', data);
+                console.log('data', data);
                 dispatch(authStateChange({ stateChange: true }));
                 setEmail('');
                 setPassword('');
                 Toast.show({
                     type: "success",
-                    text1: `Welcome, ${email} `,
+                    text1: `Привіт, ${email} `,
                 });
         });
         return;

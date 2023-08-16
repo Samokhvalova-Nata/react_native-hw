@@ -1,22 +1,22 @@
-import { StyleSheet, View, Dimensions, Image, TextInput } from "react-native";
+import { StyleSheet, View, Dimensions, Image, TextInput, Text } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { COLORS } from "../../common/vars";
 import { ScrollView } from "react-native-gesture-handler";
 import { KeyboardAvoidingView } from "react-native";
 import { useEffect, useState } from "react";
-import { db, storage } from "../../firebase/config";
-import { collection, addDoc, setDoc, Timestamp, onSnapshot } from "firebase/firestore";
+import { db } from "../../firebase/config";
+import { collection, addDoc, Timestamp, onSnapshot } from "firebase/firestore";
 import { getUserId, getUserName } from "../../redux/auth/authSelectors";
 import { useDispatch, useSelector } from "react-redux";
 import { addComment } from "../../redux/post/postSlice";
 import { Toast } from "react-native-toast-message/lib/src/Toast";
-import { Keyboard } from "react-native";
+import CommentItem from "../../Components/Comments/CommentItem";
 
 
 export default function CommentsScreen({ route }) {
     const { id, url } = route.params;
     const [comment, setComment] = useState(""); 
-    const [allComment, setAllComment] = useState([]); 
+    const [allComments, setAllComments] = useState([]); 
     const [isFocused, setIsFocused] = useState(false);
     const name = useSelector(getUserName);
     const userId = useSelector(getUserId);
@@ -35,9 +35,9 @@ export default function CommentsScreen({ route }) {
             const docRef = await addDoc(collection(db, "posts", id, "comments"), {
             comment,
             owner: { userId, name },
-            createdAt: Timestamp.fromDate(new Date()),
-            updatedAt: Timestamp.fromDate(new Date()),
+            createdAt: new Date().getTime(),
             });
+            console.log("Document written with ID: ", docRef.id);
             dispatch(addComment(comment));
             Toast.show({
                 type: "success",
@@ -55,24 +55,39 @@ export default function CommentsScreen({ route }) {
     useEffect(() => {
         const commentsRef = collection(db, "posts", id, "comments");
         onSnapshot(commentsRef, (data) => {
-            const dbComments = data.docs.map((doc) => ({ id: doc.id,...doc.data() }));
-            setAllComment(dbComments);
+            const dbComments = data.docs.map((doc) => ({ commentId: doc.id, ...doc.data() }));
+            setAllComments(dbComments);
         })
     }, []);
 
-    console.log('allComment', allComment);
-
     return (
         <View style={styles.container}>
-            <ScrollView>
+            <ScrollView >
                 <View style={styles.postPhotoWrap}>
                     <Image source={{ uri: url ? url : null }}
                     style={styles.postPhoto} />
                 </View>
+                {allComments.length !== 0
+                    ? (
+                    allComments.map(({commentId, comment, owner, createdAt}) => (
+                        <CommentItem
+                            key={commentId}
+                            commentId={commentId}
+                            comment={comment}
+                            owner={owner}
+                            createdAt={createdAt}
+                        />
+                    ))
+                    ) : (
+                    <View style={{ flex: 1, marginTop: 30, paddingHorizontal: 16 }}>
+                        <Text style={styles.text}>Ще немає коментарів</Text>
+                    </View>
+                    )
+                }
             </ScrollView>
+
             <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            >
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
                 <View style={styles.inputWrap}>
                     <TextInput
                         name="comment"
@@ -90,13 +105,12 @@ export default function CommentsScreen({ route }) {
                     <View style={styles.sendBtn} >
                         <Feather onPress={sendComment} name="arrow-up" size={24} color={COLORS.mainBcg}/>
                     </View>
-                    
                 </View>
             </KeyboardAvoidingView>
         </View>
-        
     );
 };
+
 
 const styles = StyleSheet.create({
 container: {
@@ -110,13 +124,14 @@ container: {
     borderBottomWidth: -0.5,
     borderTopColor: "rgba(0, 0, 0, 0.30)",
     borderBottomColor: "rgba(0, 0, 0, 0.30)",
-    minHeight: Dimensions.get("window").height - 150,
+    // minHeight: Dimensions.get("window").height - 150,
 },
 postPhotoWrap: {
     width: "100%",
     height: 240,
     backgroundColor: COLORS.secondaryBcg,
     borderRadius: 8,
+    marginBottom: 32,
 },
 postPhoto: {
     width: "100%",
@@ -150,5 +165,10 @@ sendBtn: {
     position: "absolute",
     top: 8,
     right: 8,
-    },
+},
+text: {
+    fontFamily: "Roboto-Regular",
+    fontSize: 13,
+    textAlign: 'center',
+},
 });
