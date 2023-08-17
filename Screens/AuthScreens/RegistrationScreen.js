@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import {
   StyleSheet,
@@ -14,36 +15,35 @@ import {
 import { AntDesign } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
+import { Camera } from "expo-camera";
+import * as MediaLibrary from "expo-media-library";
+import Toast from "react-native-toast-message";
 import { COLORS } from "../../common/vars";
+import { register } from "../../redux/auth/authOperations";
+import { storage } from "../../firebase/config";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import Background from "../../Components/Background/Background";  
 import MainButton from "../../Components/Buttons/MainButton";
 import AuthLinkButton from "../../Components/Buttons/AuthLinkButton";
-import Toast from "react-native-toast-message";
-import { register } from "../../redux/auth/authOperations";
-import { useDispatch } from "react-redux";
-import { Camera } from "expo-camera";
-import * as MediaLibrary from "expo-media-library";
-import { storage } from "../../firebase/config";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 
 export default function RegisterScreen() {
   const dispatch = useDispatch();
+  const navigation = useNavigation();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const [avatar, setAvatar] = useState("");  
+  const [isShownPsw, setIsShownPsw] = useState(true);  
   const [isFocused, setIsFocused] = useState(false);
-  const [isShownPsw, setIsShownPsw] = useState(false);
   const [keyboardStatus, setKeyboardStatus] = useState(false);
-  const navigation = useNavigation();
 
-  const [avatar, setAvatar] = useState("");
   const [hasPermission, setHasPermission] = useState(null);
   const [cameraRef, setCameraRef] = useState(null);
   const [type, setType] = useState(Camera.Constants.Type.back);
   const [openCamera, setOpenCamera] = useState(false);
+
 
   useEffect(() => {
     const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
@@ -64,10 +64,6 @@ export default function RegisterScreen() {
 
   const handleBlur = () => {
     setIsFocused("");
-  };
-
-  const handleShowPassword = () => {
-    setIsShownPsw(!isShownPsw);
   };
 
   useEffect(() => {
@@ -105,10 +101,6 @@ export default function RegisterScreen() {
           return processedPhoto;
         } catch (error) {
           console.log("error", error.message);
-          Toast.show({
-            type: "error",
-            text1: "Sending photo to server was rejected",
-          });
         }
       };
 
@@ -127,8 +119,6 @@ export default function RegisterScreen() {
           });
           return;
         }
-        // console.log('data', data);
-
         setName("");
         setEmail("");
         setPassword("");
@@ -139,10 +129,9 @@ export default function RegisterScreen() {
       });
       return;
     }
-
     Toast.show({
       type: "error",
-      text1: "You have to fill out all fields",
+      text1: "Всі поля мають бути заповнені",
     });
   };
 
@@ -277,20 +266,21 @@ export default function RegisterScreen() {
                 value={password}
                 textContentType="password"
                 autoCompleteType="off"
-                secureTextEntry
+                secureTextEntry={isShownPsw}
                 onBlur={handleBlur}
                 onFocus={() => handleFocus("password")}
                 onChangeText={(value) => setPassword(value)}
               />
-
-              <TouchableOpacity
-                style={styles.btnShowPassword}
-                onPress={handleShowPassword}
-              >
-                <Text style={styles.btnShowPasswordText}>
-                  {isShownPsw ? "Приховати" : "Показати"}
-                </Text>
-              </TouchableOpacity>
+              {password && (
+                <TouchableOpacity
+                  style={styles.btnShowPassword}
+                  onPress={() => setIsShownPsw(!isShownPsw)}
+                >
+                  <Text style={styles.btnShowPasswordText}>
+                    {isShownPsw ? "Показати" : "Приховати"}
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
 
             {!keyboardStatus && (

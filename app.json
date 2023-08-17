@@ -48,6 +48,12 @@
           "savePhotosPermission": "Allow app to save photos.",
           "isAccessMediaLocationEnabled": true
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos."
+        }
       ]
     ]
   }

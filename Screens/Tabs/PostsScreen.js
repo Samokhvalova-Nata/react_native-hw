@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, Image, ScrollView, Dimensions, FlatList } from 'react-native';
-import { COLORS } from "../../common/vars";
+import { StyleSheet, Text, View, Image, ScrollView, Dimensions } from 'react-native';
 import { useSelector } from "react-redux";
-import { db } from "../../firebase/config";
 import { collection, onSnapshot } from "firebase/firestore";
+import { COLORS } from "../../common/vars";
+import { db } from "../../firebase/config";
 import { getUserAvatar, getUserEmail, getUserName } from "../../redux/auth/authSelectors";
 import PostItem from "../../Components/Posts/PostItem";
 
@@ -18,7 +18,8 @@ export default function PostsScreen() {
         const dbRef = collection(db, "posts");
         onSnapshot(dbRef, (data) => {
             const dbPosts = data.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-            setServerPosts(dbPosts);
+            const sortedDbPosts = dbPosts.sort((a, b) => a.createdAt - b.createdAt);
+            setServerPosts(sortedDbPosts);
         })
     }, []);
 

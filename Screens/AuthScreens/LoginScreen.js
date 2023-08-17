@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { useNavigation } from '@react-navigation/native';
 import { StyleSheet, Text, View, TouchableOpacity, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform, TextInput } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { useDispatch } from "react-redux";
+import Toast from "react-native-toast-message";
 import { COLORS } from "../../common/vars";
+import { login } from "../../redux/auth/authOperations";
+import { authStateChange } from "../../redux/auth/authSlice";
 import Background from '../../Components/Background/Background';
 import MainButton from '../../Components/Buttons/MainButton';
 import AuthLinkButton from "../../Components/Buttons/AuthLinkButton";
-import { useDispatch } from "react-redux";
-import { login } from "../../redux/auth/authOperations";
-import Toast from "react-native-toast-message";
-import { authStateChange } from "../../redux/auth/authSlice";
+
 
 export default function LoginScreen() {
     const dispatch = useDispatch();
@@ -16,7 +17,7 @@ export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isFocused, setIsFocused] = useState(false); 
-    const [isShownPsw, setIsShownPsw] = useState(false);
+    const [isShownPsw, setIsShownPsw] = useState(true);  
     const [keyboardStatus, setKeyboardStatus] = useState(false);
     const navigation = useNavigation();
 
@@ -41,10 +42,6 @@ export default function LoginScreen() {
         setIsFocused('');
     };
 
-    const handleShowPassword = () => {
-        setIsShownPsw(!isShownPsw);
-    };
-
     const handleLoginSubmit = () => {
         if (email && password) {
             dispatch(login(email, password)).then((data) => {
@@ -55,7 +52,6 @@ export default function LoginScreen() {
                     });
                     return;
                 }
-                console.log('data', data);
                 dispatch(authStateChange({ stateChange: true }));
                 setEmail('');
                 setPassword('');
@@ -69,11 +65,9 @@ export default function LoginScreen() {
 
         Toast.show({
             type: "error",
-            text1: "You have to fill out all fields",
+            text1: "Всі поля мають бути заповнені",
         });
     };
-
-
 
     return (
         <>
@@ -104,19 +98,21 @@ export default function LoginScreen() {
                             value={password}
                             textContentType="password"
                             autoCompleteType="off"
-                            secureTextEntry
+                            secureTextEntry={isShownPsw}
                             onBlur={handleBlur}
                             onFocus={() => handleFocus("password")}
                             onChangeText={setPassword}
                         />
-
-                        <TouchableOpacity
-                                style={styles.btnShowPassword}
-                                onPress={handleShowPassword}>
-                                <Text style={styles.btnShowPasswordText}>
-                                    {isShownPsw ? "Приховати" : "Показати"}
-                                </Text>    
+                        {password && (
+                            <TouchableOpacity
+                            style={styles.btnShowPassword}
+                            onPress={() => setIsShownPsw(!isShownPsw)}
+                            >
+                            <Text style={styles.btnShowPasswordText}>
+                                {isShownPsw ? "Показати" : "Приховати"}
+                            </Text>
                             </TouchableOpacity>
+                        )}
                         </View>
 
                         {!keyboardStatus &&

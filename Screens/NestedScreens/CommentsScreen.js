@@ -1,26 +1,27 @@
-import { StyleSheet, View, Dimensions, Image, TextInput, Text } from "react-native";
-import { Feather } from "@expo/vector-icons";
-import { COLORS } from "../../common/vars";
+import { StyleSheet, View, Image, TextInput, Text, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
-import { KeyboardAvoidingView } from "react-native";
+import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
+import { Feather } from "@expo/vector-icons";
+import { collection, addDoc, onSnapshot } from "firebase/firestore";
+import Toast from "react-native-toast-message";
+import { COLORS } from "../../common/vars";
 import { db } from "../../firebase/config";
-import { collection, addDoc, Timestamp, onSnapshot } from "firebase/firestore";
-import { getUserId, getUserName } from "../../redux/auth/authSelectors";
-import { useDispatch, useSelector } from "react-redux";
-import { addComment } from "../../redux/post/postSlice";
-import { Toast } from "react-native-toast-message/lib/src/Toast";
+import { getUserAvatar, getUserId, getUserName } from "../../redux/auth/authSelectors";
 import CommentItem from "../../Components/Comments/CommentItem";
 
 
 export default function CommentsScreen({ route }) {
     const { id, url } = route.params;
+
     const [comment, setComment] = useState(""); 
     const [allComments, setAllComments] = useState([]); 
     const [isFocused, setIsFocused] = useState(false);
+
     const name = useSelector(getUserName);
     const userId = useSelector(getUserId);
-    const dispatch = useDispatch();
+    const avatar = useSelector(getUserAvatar);
+
 
     const sendComment = async () => {
         if (!comment) {
@@ -30,15 +31,14 @@ export default function CommentsScreen({ route }) {
             });
             return;
         }
-
         try {
             const docRef = await addDoc(collection(db, "posts", id, "comments"), {
             comment,
-            owner: { userId, name },
+            owner: { userId, name, avatar },
             createdAt: new Date().getTime(),
             });
             console.log("Document written with ID: ", docRef.id);
-            dispatch(addComment(comment));
+            setComment("");
             Toast.show({
                 type: "success",
                 text1: "Збережено",
@@ -47,67 +47,70 @@ export default function CommentsScreen({ route }) {
             console.error("sendComment: ", e);
             throw e;
         }
-        finally {
-            setComment("");
-        }
     };
 
     useEffect(() => {
         const commentsRef = collection(db, "posts", id, "comments");
         onSnapshot(commentsRef, (data) => {
             const dbComments = data.docs.map((doc) => ({ commentId: doc.id, ...doc.data() }));
-            setAllComments(dbComments);
+            const sortedDbComments = dbComments.sort((a, b) => a.createdAt - b.createdAt)
+            setAllComments(sortedDbComments);
         })
     }, []);
 
     return (
-        <View style={styles.container}>
-            <ScrollView >
-                <View style={styles.postPhotoWrap}>
-                    <Image source={{ uri: url ? url : null }}
-                    style={styles.postPhoto} />
-                </View>
-                {allComments.length !== 0
-                    ? (
-                    allComments.map(({commentId, comment, owner, createdAt}) => (
+        <TouchableWithoutFeedback TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.container}>
+                <ScrollView>
+                    <View style={styles.postPhotoWrap}>
+                    <Image
+                        source={{ uri: url ? url : null }}
+                        style={styles.postPhoto}
+                    />
+                    </View>
+                    {allComments.length !== 0 ? (
+                    allComments.map(({ commentId, comment, owner, createdAt }) => (
                         <CommentItem
-                            key={commentId}
-                            commentId={commentId}
-                            comment={comment}
-                            owner={owner}
-                            createdAt={createdAt}
+                        key={commentId}
+                        commentId={commentId}
+                        comment={comment}
+                        owner={owner}
+                        createdAt={createdAt}
                         />
                     ))
                     ) : (
                     <View style={{ flex: 1, marginTop: 30, paddingHorizontal: 16 }}>
                         <Text style={styles.text}>Ще немає коментарів</Text>
                     </View>
-                    )
-                }
-            </ScrollView>
-
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-                <View style={styles.inputWrap}>
-                    <TextInput
-                        name="comment"
+                    )}
+                </ScrollView>
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}>
+                    <View style={styles.inputWrap}>
+                        <TextInput
+                            name="comment"
                         value={comment}
                         placeholder="Коментувати..."
                         placeholderTextColor={COLORS.secondaryText}
                         style={
-                            isFocused
+                        isFocused
                             ? { ...styles.input, borderColor: COLORS.accent }
-                            : { ...styles.input}}
-                            onFocus={() => setIsFocused(true)}
+                            : { ...styles.input }
+                        }
+                        onFocus={() => setIsFocused(true)}
                         onBlur={() => setIsFocused(false)}
-                        onChangeText={value => setComment(value)}
-                    />
-                    <View style={styles.sendBtn} >
-                        <Feather onPress={sendComment} name="arrow-up" size={24} color={COLORS.mainBcg}/>
+                            onChangeText={(value) => setComment(value)} />
+                        <View style={styles.sendBtn}>
+                            <Feather
+                            onPress={sendComment}
+                            name="arrow-up"
+                            size={24}
+                            color={COLORS.mainBcg} />
+                        </View>
                     </View>
-                </View>
-            </KeyboardAvoidingView>
-        </View>
+                </KeyboardAvoidingView>
+            </View>
+        </TouchableWithoutFeedback>
     );
 };
 
@@ -118,13 +121,11 @@ container: {
     justifyContent: "flex-start",
     paddingHorizontal: 16,
     paddingTop: 32,
-    // paddingBottom: 45,
     backgroundColor: COLORS.mainBcg,
     borderTopWidth: 0.5,
     borderBottomWidth: -0.5,
     borderTopColor: "rgba(0, 0, 0, 0.30)",
     borderBottomColor: "rgba(0, 0, 0, 0.30)",
-    // minHeight: Dimensions.get("window").height - 150,
 },
 postPhotoWrap: {
     width: "100%",
@@ -137,14 +138,13 @@ postPhoto: {
     width: "100%",
     height: 240,
     borderRadius: 8,
-    },
-    inputWrap: {
+},
+inputWrap: {
     marginTop: 31,
     marginBottom: 16,
 },
 input: {
     height: 50,
-    // justifyContent: 'flex-end',
     fontFamily: "Roboto-Regular",
     fontSize: 16,
     backgroundColor: COLORS.secondaryBcg,
@@ -154,7 +154,7 @@ input: {
     paddingTop: 16,
     paddingHorizontal: 16,
     paddingBottom: 15,
-    },
+},
 sendBtn: {
     justifyContent: 'center',
     alignItems: 'center',

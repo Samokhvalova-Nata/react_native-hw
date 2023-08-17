@@ -1,14 +1,58 @@
 import { StyleSheet, Text, View, ImageBackground, TouchableOpacity } from "react-native";
 import { Feather, FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useState } from "react";
 import { COLORS } from "../../common/vars";
-import { useDispatch } from "react-redux";
-import { deletePost } from "../../redux/post/postOperations";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "../../firebase/config";
+import { deleteLike, deletePost, sendLike } from "../../redux/post/postOperations";
+import { getUserAvatar, getUserId, getUserName } from "../../redux/auth/authSelectors";
 
 
-export default function PostProfileItem({id, title, comments=0, likes=0, photoLocation, url, geoLocation }) {
+export default function PostProfileItem({id, title, photoLocation, url, geoLocation }) {
   const navigation = useNavigation();
   const dispatch = useDispatch();
+
+  const name = useSelector(getUserName);
+  const userId = useSelector(getUserId);
+  const avatar = useSelector(getUserAvatar);
+
+  const [allComments, setAllComments] = useState([]);
+  const [allLikes, setAllLikes] = useState([]);
+  const [userPutLike, setUserPutLike] = useState(false);
+
+  useEffect(() => {
+    const commentsRef = collection(db, "posts", id, "comments");
+    onSnapshot(commentsRef, (data) => {
+      const dbComments = data.docs.map((doc) => ({
+        commentId: doc.id,
+        ...doc.data(),
+      }));
+      setAllComments(dbComments);
+    });
+  }, []);
+
+  useEffect(() => {
+    const likesRef = collection(db, "posts", id, "likes");
+    onSnapshot(likesRef, (data) => {
+      const dbLikes = data.docs.map((doc) => ({
+        likeId: doc.id,
+        ...doc.data(),
+      }));
+      const didUserPutLike = dbLikes.some(dbLike => dbLike.likeId === userId);
+      setUserPutLike(didUserPutLike)
+      setAllLikes(dbLikes);
+    });
+  }, []);
+  
+  const handleLikes = async () => {
+    if (!userPutLike) {
+        await sendLike(id, userId, name, avatar);
+      return;
+    }
+    await deleteLike(id, userId);
+  };
 
   return (
     <View style={styles.postContainer}>
@@ -30,21 +74,25 @@ export default function PostProfileItem({id, title, comments=0, likes=0, photoLo
       <View style={styles.postDetails}>
         <TouchableOpacity
           style={styles.postData}
-          onPress={() => navigation.navigate("Comments", { url, id })}>
+          onPress={() => navigation.navigate("Comments", { url, id })}
+        >
           <FontAwesome
-            name={comments === 0 ? "comment-o" : "comment"}
+            name={allComments.length === 0 ? "comment-o" : "comment"}
             size={24}
-            color={comments === 0 ? COLORS.secondaryText : COLORS.accent}
+            color={
+              allComments.length === 0 ? COLORS.secondaryText : COLORS.accent
+            }
           />
-          <Text style={styles.commentText}>{comments}</Text>
+          <Text style={styles.commentText}>{allComments.length}</Text>
         </TouchableOpacity>
         <View style={{ ...styles.postData, marginLeft: 24 }}>
           <Feather
             name="thumbs-up"
             size={24}
-            color={likes === 0 ? COLORS.secondaryText : COLORS.accent}
+            color={!userPutLike ? COLORS.secondaryText : COLORS.accent}
+            onPress={handleLikes}
           />
-          <Text style={styles.commentText}>{likes}</Text>
+          <Text style={styles.commentText}>{allLikes.length}</Text>
         </View>
         <View style={styles.postLocation}>
           <Feather name="map-pin" size={24} color={COLORS.secondaryText} />

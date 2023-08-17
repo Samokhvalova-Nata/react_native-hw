@@ -1,28 +1,35 @@
-import { StyleSheet,Image, Text, View, TouchableOpacity } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { COLORS } from "../../common/vars";
-import { useDispatch } from "react-redux";
 import moment from "moment";
 import "moment/locale/uk";
+import { StyleSheet, Image, Text, View } from "react-native";
+import { useSelector } from "react-redux";
+import { COLORS } from "../../common/vars";
+import { getUserId } from "../../redux/auth/authSelectors";
 
 
-export default function CommentItem({ commentId, comment, owner, createdAt }) {
-    const navigation = useNavigation();
-    const dispatch = useDispatch();
+export default function CommentItem({ comment, owner, createdAt }) {
+    const userId = useSelector(getUserId);
 
     return (
         <View style={{
                 ...styles.commentContainer,
-                // flexDirection: index % 2 === 0 ? "row" : "row-reverse",
+                flexDirection: userId !== owner.userId ? "row" : "row-reverse",
             }}>
-            <Image source={require("../../assets/images/avatar.jpg")}
+            <Image source={{uri: owner.avatar}}
                 alt="User photo"
                 style={styles.avatar} />
-            <View style={styles.commentWrap}>
+            <View style={{
+                ...styles.commentWrap,
+                borderTopLeftRadius: userId !== owner.userId ? 0 : 6,
+                borderTopRightRadius: userId !== owner.userId ? 6 : 0,
+                }}>
                 <Text style={styles.comment}>{comment}</Text>
-                <Text style={styles.date}> {moment(createdAt).locale('uk').format('DD MMMM, YYYY | HH:mm')}</Text>
+                <Text style={
+                    userId !== owner.userId
+                        ? styles.dateUser
+                        : styles.dateOwner }>
+                    {moment(createdAt).locale('uk').format('DD MMMM, YYYY | HH:mm')}
+                </Text>
             </View>
-        
         </View>
 );
 };
@@ -39,23 +46,10 @@ avatar: {
     height: 28,
     borderRadius: 28,
 },
-trashBtn: {
-    width: 40,
-    height: 40,
-    backgroundColor: COLORS.mainBcg,
-    borderRadius: 30,
-    justifyContent: "center",
-    alignItems: "center",
-    position: "absolute",
-    top: 10,
-    right: 10,
-    },
 commentWrap: {
     position: 'relative',
     flex: 1,
-    borderBottomLeftRadius: 6,
-    borderBottomRightRadius: 6,
-    // borderRadius: 6,
+    borderRadius: 6,
     backgroundColor: 'rgba(0, 0, 0, 0.03)',
     padding: 16,
     gap:8,
@@ -66,12 +60,20 @@ comment: {
     color: COLORS.mainText,
     fontSize: 13,
 },
-date: {
+dateUser: {
     fontFamily: "Roboto-Regular",
     color: COLORS.secondaryText,
     fontSize: 10,
     position: 'absolute',
     bottom: 16,
     right: 16,
+},
+dateOwner: {
+    fontFamily: "Roboto-Regular",
+    color: COLORS.secondaryText,
+    fontSize: 10,
+    position: 'absolute',
+    bottom: 16,
+    left: 16,
 },
 });

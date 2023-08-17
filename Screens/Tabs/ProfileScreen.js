@@ -3,95 +3,96 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import { Dimensions, StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
-import { Feather } from "@expo/vector-icons";
-import { AntDesign } from "@expo/vector-icons";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Ionicons } from "@expo/vector-icons";
+import { Feather, AntDesign, Ionicons } from "@expo/vector-icons";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
+import Toast from "react-native-toast-message";
+import * as ImagePicker from "expo-image-picker";
 import { COLORS } from "../../common/vars";
+import { db, storage } from "../../firebase/config";
 import { getUserAvatar, getUserId, getUserName } from "../../redux/auth/authSelectors";
 import { logout, updateUserAvatar } from "../../redux/auth/authOperations";
 import Background from "../../Components/Background/Background";
 import PostProfileItem from "../../Components/Posts/PostProfileItem";
-import Avatar from "../../Components/Avatar/Avatar";
 import MainButton from "../../Components/Buttons/MainButton";
-import { collection, onSnapshot, query, where } from "firebase/firestore";
-import { db, storage } from "../../firebase/config";
-import { Camera } from "expo-camera";
-import * as MediaLibrary from "expo-media-library";
-import Toast from "react-native-toast-message";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-
 
 
 export default function ProfileScreen() {
-    const navigation = useNavigation();
-    const name = useSelector(getUserName);
-    const userId = useSelector(getUserId);
-    const avatarSever = useSelector(getUserAvatar);
+  const navigation = useNavigation();
+  const dispatch = useDispatch();  
 
-    const [newAvatar, setNewAvatar] = useState("");
-    const [cameraRef, setCameraRef] = useState(null);
-    const [type, setType] = useState(Camera.Constants.Type.back);
-    const [openCamera, setOpenCamera] = useState(false);
+  const name = useSelector(getUserName);
+  const userId = useSelector(getUserId);
+  const avatar = useSelector(getUserAvatar);
 
-    const dispatch = useDispatch();
-    const [userPosts, setUserPosts] = useState([]);
+  const [newAvatar, setNewAvatar] = useState("");
+  const [changeAvatar, setChangeAvatar] = useState(false);
+  const [userPosts, setUserPosts] = useState([]);
 
-    useEffect(() => {
-        const dbRef = collection(db, "posts");
-        const userQuery = query(dbRef, where("owner.userId", "==", userId));
-        onSnapshot(userQuery, (data) => {
-            const dbPosts = data.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-            setUserPosts(dbPosts);
-        })
-    }, []);
 
-    const uploadPhotoToServer = async () => {
-        const uniqPostId = Date.now().toString();
-        try {
-            const response = await fetch(newAvatar);
-            const file = await response.blob();
-            const imageRef = ref(storage, `avatarImage/${uniqPostId}`);
-            await uploadBytes(imageRef, file);
-            const processedPhoto = await getDownloadURL(imageRef);
-            return processedPhoto;
-        } catch (error) {
-            console.log("error", error.message);
-            Toast.show({
-                type: "error",
-                text1: "Sending photo to server was rejected",
-            });
+  useEffect(() => {
+    const dbRef = collection(db, "posts");
+    const userQuery = query(dbRef, where("owner.userId", "==", userId));
+    onSnapshot(userQuery, (data) => {
+      const dbPosts = data.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      const sortedDbPosts = dbPosts.sort((a, b) => a.createdAt - b.createdAt);
+      setUserPosts(sortedDbPosts);
+    })
+  }, []);
+
+  const pickImage = async () => {
+    try {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status === 'granted') {
+        const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+        });
+        if (!result.canceled) {
+          setNewAvatar(result.assets[0].uri);
+          setChangeAvatar(true);
         }
-    };
+      }
+      } catch (error) {
+        console.log("error", error.message);
+      }
+  };
 
-    const makePhoto = async () => {
-        if (cameraRef) {
-            const { uri } = await cameraRef.takePictureAsync();
-            setNewAvatar(uri);
-            setOpenCamera(false);
+  const uploadPhotoToServer = async () => {
+    const uniqPostId = Date.now().toString();
+    try {
+        const response = await fetch(newAvatar);
+        const file = await response.blob();
+        const imageRef = ref(storage, `avatarImage/${uniqPostId}`);
+        await uploadBytes(imageRef, file);
 
-            const newServerAvatar = await uploadPhotoToServer();
+        const processedPhoto = await getDownloadURL(imageRef);
+        return processedPhoto;
+    } catch (error) {
+        console.log("error", error.message);
+    }
+  };
+  
+  const uploadAvatarToServer = async () => {
+    const dbAvatar = await uploadPhotoToServer();
+    dispatch(updateUserAvatar(dbAvatar)).then((data) => {
+      if (data === undefined || !data.uid) {
+          Toast.show({
+            type: "error",
+            text1: "Упс! Аватар не замінено",
+        });
+      return;
+      }
+      setChangeAvatar(false);
+      Toast.show({
+        type: "success",
+        text1: "Аватар замінено успішно",
+      });
+    });
+  };
 
-            dispatch(updateUserAvatar(newServerAvatar)).then((data) => {
-                // console.log('data', data);
-            if (data === undefined || !data.uid) {
-                Toast.show({
-                    type: "error",
-                    text1: "Упс! Аватар не замінено",
-                });
-            return;
-                }
-                
-            Toast.show({
-                type: "success",
-                text1: "Аватар замінено успішно",
-            });
-            });
-        }
-    };
-
-    console.log('avatarSever', avatarSever);
-    
 
     return (
       <>
@@ -105,70 +106,38 @@ export default function ProfileScreen() {
               style={{ position: "absolute", top: 22, right: 16 }}
               onPress={() => dispatch(logout())}
             />
-
             <View style={styles.avatarWrap}>
-              {openCamera ? (
-                <Camera
-                  style={styles.avatar}
-                  type={type}
-                  ref={setCameraRef}
-                  ratio="1:1"
-                >
-                  <TouchableOpacity
-                    style={{ ...styles.cameraBtn }}
-                    onPress={() => {
-                      setType(
-                        type === Camera.Constants.Type.front
-                          ? Camera.Constants.Type.back
-                          : Camera.Constants.Type.front
-                      );
-                    }}
-                  >
-                    <MaterialCommunityIcons
-                      name="camera-flip"
-                      size={22}
-                      color={COLORS.secondaryText}
-                    />
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={{ ...styles.cameraBtnPos, ...styles.cameraBtn }}
-                    onPress={makePhoto}
-                  >
-                    <Ionicons
-                      name="ios-camera"
-                      size={24}
-                      color={COLORS.secondaryText}
-                    />
-                  </TouchableOpacity>
-                </Camera>
-              ) : (
-                <Image
-                  source={{ uri: newAvatar? newAvatar : avatarSever }}
-                  style={styles.avatar}
-                  alt="User photo"
-                />
-              )}
-
+                  <Image
+                    source={{ uri: newAvatar ? newAvatar : avatar }}
+                    style={styles.avatar}
+                    alt="User photo"
+                  />
+                  {changeAvatar && (
+                    <TouchableOpacity
+                      style={{ ...styles.cameraBtnPos, ...styles.cameraBtn }}
+                      onPress={uploadAvatarToServer}
+                    >
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={24}
+                        color={COLORS.accent}
+                      />
+                    </TouchableOpacity>
+                  )}
               <TouchableOpacity style={styles.btnAdd}>
                 {!newAvatar ? (
                   <AntDesign
                     name="pluscircleo"
                     size={25}
                     color={COLORS.accent}
-                    onPress={() => {
-                      setNewAvatar(null);
-                      setOpenCamera(true);
-                    }}
+                    onPress={pickImage}
                   />
                 ) : (
                   <AntDesign
                     name="closecircleo"
                     size={25}
                     color={COLORS.secondaryText}
-                    onPress={() => {
-                      setOpenCamera(true);
-                    }}
+                    onPress={pickImage}
                   />
                 )}
               </TouchableOpacity>
@@ -184,8 +153,6 @@ export default function ProfileScreen() {
                   photoLocation,
                   photo,
                   geoLocation,
-                  comments,
-                  likes,
                 }) => (
                   <PostProfileItem
                     key={id}
@@ -194,8 +161,6 @@ export default function ProfileScreen() {
                     photoLocation={photoLocation}
                     url={photo}
                     geoLocation={geoLocation}
-                    comments={comments}
-                    likes={likes}
                   />
                 )
               )

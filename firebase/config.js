@@ -6,8 +6,6 @@ import { getStorage } from "firebase/storage";
 const firebaseConfig = {
     apiKey: "AIzaSyAvPA7b2K4S5c7QpvLyTFTUtMRx35dvPAU",
     authDomain: "rn-social-ed3b9.firebaseapp.com",
-    // databaseURL:
-    //     "https://rn-social-ed3b9-default-rtdb.europe-west1.firebasedatabase.app",
     projectId: "rn-social-ed3b9",
     storageBucket: "rn-social-ed3b9.appspot.com",
     messagingSenderId: "78172023334",

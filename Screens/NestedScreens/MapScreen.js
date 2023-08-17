@@ -1,11 +1,11 @@
 import React from "react";
-import { View, StyleSheet } from "react-native";
 import MapView, { Marker } from "react-native-maps";
+import { View, StyleSheet } from "react-native";
+
 
 export default function MapScreen({ route }) {
     const latitude = route.params.geoLocation?.latitude ?? 50.45033004843756;
     const longitude = route.params.geoLocation?.longitude ?? 30.523874329583546;
-    // console.log('route.params', route.params)
 
     return (
         <View style={styles.container}>
@@ -33,12 +33,12 @@ export default function MapScreen({ route }) {
 };
 
 const styles = StyleSheet.create({
-    container: {
+container: {
         flex: 1,
         backgroundColor: "#fff",
         justifyContent: "center",
-    },
-    mapStyle: {
+},
+mapStyle: {
         flex: 1,
-    },
+},
 });

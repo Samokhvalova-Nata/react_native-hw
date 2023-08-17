@@ -1,28 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { ImageBackground, KeyboardAvoidingView } from "react-native";
-import { ScrollView, StyleSheet, Text, View, TouchableWithoutFeedback, Keyboard, TouchableOpacity, TextInput } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Feather } from '@expo/vector-icons';
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { COLORS } from "./../../common/vars";
+import { ScrollView, StyleSheet, Text, View, TouchableWithoutFeedback, Keyboard, TouchableOpacity, TextInput, ImageBackground, KeyboardAvoidingView } from 'react-native';
+import { useNavigation } from "@react-navigation/native";
+import { useSelector } from "react-redux";
+import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Camera } from "expo-camera";
 import * as Location from "expo-location";
 import * as MediaLibrary from "expo-media-library";
-import { useNavigation } from "@react-navigation/native";
-import { useDispatch, useSelector } from "react-redux";
-import { addPost } from "../../redux/post/postSlice";
-import { db, storage } from "../../firebase/config";
+import Toast from "react-native-toast-message";
 import { collection, addDoc } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { Toast } from "react-native-toast-message/lib/src/Toast";
+import { COLORS } from "./../../common/vars";
+import { db, storage } from "../../firebase/config";
 import { getUserId, getUserName } from "../../redux/auth/authSelectors";
 
 
 export default function CreatePostsScreen() {
-    const dispatch = useDispatch();
+    const navigation = useNavigation();
     const name = useSelector(getUserName);
     const userId = useSelector(getUserId);
-    const navigation = useNavigation();
 
     const [photo, setPhoto] = useState('');
     const [title, setTitle] = useState('');
@@ -35,14 +30,12 @@ export default function CreatePostsScreen() {
     const [isFocused, setIsFocused] = useState(null); 
 
     useEffect(() => {
-        // camera permission
         (async () => {
             const { status } = await Camera.requestCameraPermissionsAsync();
             await MediaLibrary.requestPermissionsAsync();
             setHasPermission(status === "granted");
         })();
 
-        // location permission
         (async () => {
             let { status } = await Location.requestForegroundPermissionsAsync();
             if (status !== "granted") {
@@ -86,16 +79,20 @@ export default function CreatePostsScreen() {
                 title,
                 photoLocation,
                 geoLocation,
-                owner: { userId, name }
+                owner: { userId, name },
+                createdAt: new Date().getTime(),
             });
             console.log('Document written with ID: ', docRef.id);
-            dispatch(addPost(title, photoLocation, photo, geoLocation));
             Toast.show({
                 type: "success",
                 text1: "Збережено",
             });
         } catch (e) {
             console.error("Error adding document: ", e);
+            Toast.show({
+                type: "error",
+                text1: "Упс! Пост не зберігся",
+            });
             throw e;
         } finally {
             removePost();
@@ -115,10 +112,6 @@ export default function CreatePostsScreen() {
             return processedPhoto;
         } catch (error) {
             console.log('error', error.message)
-            Toast.show({
-                type: "error",
-                text1: "Sending photo to server was rejected",
-            });
         }
     };    
 
