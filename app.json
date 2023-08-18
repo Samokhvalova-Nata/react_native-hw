@@ -15,14 +15,35 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Allow app to access your photos.",
+        "NSPhotoLibraryAddUsageDescription": "Allow app to save photos."
+      }
     },
     "android": {
       "softwareKeyboardLayoutMode": "pan",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_MEDIA_LOCATION"
+      ],
+      "package": "com.nataliia_samokhvalova.AwesomeProject",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDc6Xv9FqL03KgmrUUt-Kcpy-xBtsN93FE"
       }
+    }
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -55,6 +76,11 @@
           "photosPermission": "The app accesses your photos."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "65293bac-4331-4982-b3f1-4f18463ace51"
+      }
+    }
   }
 }
