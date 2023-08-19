@@ -39,12 +39,7 @@
         "android.permission.ACCESS_MEDIA_LOCATION"
       ],
       "package": "com.nataliia_samokhvalova.AwesomeProject",
-      "config": {
-        "googleMaps": {
-          "apiKey": "AIzaSyDc6Xv9FqL03KgmrUUt-Kcpy-xBtsN93FE"
-      }
-    }
-    },
+     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
